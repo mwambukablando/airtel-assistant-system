@@ -2,52 +2,43 @@ package com.airtel.assistant.view;
 
 import java.awt.Color;
 import java.awt.Font;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-
+import javax.swing.*;
 import com.airtel.assistant.controller.LoginController;
-import com.airtel.assistant.utils.AppStyle; // Ensure this matches your package structure
+import com.airtel.assistant.service.AssetService; // Added
+import com.airtel.assistant.utils.AppStyle;
 
 public class LoginForm extends JFrame {
 
-    // Components
     private JTextField txtUser;
     private JPasswordField txtPass;
     private JButton btnLogin;
     private JLabel lblTitle, lblUser, lblPass;
 
     private LoginController controller = new LoginController();
+    
+    // We need a reference to the service to pass it to the Dashboard
+    private AssetService assetService = new AssetService(); 
 
     public LoginForm() {
-        // --- WINDOW SETTINGS ---
         setTitle("Airtel Assistant | Secure Login");
-        setSize(400, 300); // Slightly wider for a better "Modern" feel
+        setSize(415, 350);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
 
-        // --- CONTENT PANE SETUP ---
         JPanel panel = new JPanel();
         panel.setBackground(AppStyle.DARK_BG);
         panel.setLayout(null);
         setContentPane(panel);
 
-        // --- HEADER / LOGO SECTION ---
+        // Header
         lblTitle = new JLabel("AIRTEL LOGIN", SwingConstants.CENTER);
         lblTitle.setBounds(50, 20, 300, 40);
         lblTitle.setForeground(AppStyle.AIRTEL_RED);
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         panel.add(lblTitle);
 
-        // --- USERNAME SECTION ---
+        // Username
         lblUser = new JLabel("Username");
         lblUser.setBounds(50, 80, 100, 20);
         lblUser.setForeground(AppStyle.TEXT_DIM);
@@ -59,7 +50,7 @@ public class LoginForm extends JFrame {
         AppStyle.styleTextField(txtUser);
         panel.add(txtUser);
 
-        // --- PASSWORD SECTION ---
+        // Password
         lblPass = new JLabel("Password");
         lblPass.setBounds(50, 150, 100, 20);
         lblPass.setForeground(AppStyle.TEXT_DIM);
@@ -71,18 +62,13 @@ public class LoginForm extends JFrame {
         AppStyle.styleTextField(txtPass);
         panel.add(txtPass);
 
-        // --- LOGIN BUTTON ---
+        // Button
         btnLogin = new JButton("ACCESS SYSTEM");
         btnLogin.setBounds(50, 225, 300, 45);
         AppStyle.styleDarkButton(btnLogin);
         panel.add(btnLogin);
 
-        // Adjust window size to fit everything comfortably
-        setSize(415, 350);
-
-        // Action Listener
         btnLogin.addActionListener(e -> login());
-
         setVisible(true);
     }
 
@@ -100,13 +86,17 @@ public class LoginForm extends JFrame {
         if (success) {
             JOptionPane.showMessageDialog(this, "Welcome Back, " + username + "!");
             dispose();
-            new Dashboard(); // This will open your next styled window
+            // FIX: Passing the assetService to the new Dashboard constructor
+            new Dashboard(assetService); 
         } else {
-            // Custom red error message for dark mode
-            UIManager.put("OptionPane.background", AppStyle.DARK_BG);
-            UIManager.put("Panel.background", AppStyle.DARK_BG);
-            UIManager.put("OptionPane.messageForeground", Color.WHITE);
+            styleOptionPane();
             JOptionPane.showMessageDialog(this, "Invalid Credentials!", "Login Failed", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void styleOptionPane() {
+        UIManager.put("OptionPane.background", AppStyle.DARK_BG);
+        UIManager.put("Panel.background", AppStyle.DARK_BG);
+        UIManager.put("OptionPane.messageForeground", Color.WHITE);
     }
 }
