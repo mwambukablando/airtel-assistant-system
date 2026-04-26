@@ -1,58 +1,49 @@
 package com.airtel.assistant.repository;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-@Repository // Added to make it a Spring-managed Repository
+@Repository
 public class UserRepository {
 
-    // These pull directly from your application.properties and Render Env Variables
     @Value("${spring.datasource.url}")
     private String dbUrl;
-
     @Value("${spring.datasource.username}")
     private String dbUser;
-
     @Value("${spring.datasource.password}")
     private String dbPass;
 
-    public boolean login(String username, String password) {
-        // We use the variables injected by Spring instead of DatabaseConfig
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
-            String sql = "SELECT * FROM users WHERE username=? AND password=?";
+    private Connection getConnection() throws Exception {
+        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
+    }
 
-            PreparedStatement ps = conn.prepareStatement(sql);
+    // --- Create User with Defaults: Password '123' and Role 'USER' ---
+    public boolean createUser(String firstName, String lastName, String username) {
+        String fullName = firstName + " " + lastName;
+        String sql = "INSERT INTO users (username, password, role, full_name) VALUES (?, '123', 'USER', ?)";
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
-            ps.setString(2, password);
-
-            ResultSet rs = ps.executeQuery();
-            return rs.next(); 
-
+            ps.setString(2, fullName);
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public String getRole(String username) {
-        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPass)) {
-            String sql = "SELECT role FROM users WHERE username=?";
-
+    // --- Get All Users for the Management Table ---
+    public ResultSet getAllUsers() {
+        String sql = "SELECT username, full_name, role FROM users";
+        try {
+            Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
-            ps.setString(1, username);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                return rs.getString("role");
-            }
-
+            return ps.executeQuery();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 }
