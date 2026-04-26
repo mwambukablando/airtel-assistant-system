@@ -1,41 +1,90 @@
 package com.airtel.assistant.controller;
 
-import java.sql.ResultSet;
+import com.airtel.assistant.model.Asset;
 import com.airtel.assistant.service.AssetService;
-import org.springframework.beans.factory.annotation.Autowired; // Added
-import org.springframework.stereotype.Controller; // Added
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
-@Controller // This makes the class a "Bean" so LoginController can find it
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+@Controller
 public class AssetController {
 
-    @Autowired // Spring will now inject AssetService with all DB variables loaded
+    @Autowired
     private AssetService service;
 
-    public boolean addAsset(String name, String serial, String type) {
-        return service.addAsset(name, serial, type);
+    // ================= WEB ROUTES =================
+
+    @GetMapping("/assets/add")
+    public String showAddAssetForm(Model model) {
+        model.addAttribute("assets", loadAssetsForWeb());
+        return "add-asset";
+    }
+
+    @PostMapping("/assets/save")
+    public String saveAsset(@RequestParam String assetTag,
+                            @RequestParam String deviceName,
+                            @RequestParam String serialNumber,
+                            @RequestParam String brand,
+                            @RequestParam String modelName,
+                            @RequestParam String category,
+                            Model model) {
+        
+        boolean success = addAsset(assetTag, deviceName, serialNumber, brand, modelName, category);
+        
+        if (success) {
+            return "redirect:/assets/add";
+        } else {
+            model.addAttribute("error", "Error: Could not save asset.");
+            model.addAttribute("assets", loadAssetsForWeb());
+            return "add-asset";
+        }
+    }
+
+    // ================= SWING BRIDGE METHODS =================
+
+    public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
+        return service.addAsset(tag, name, serial, brand, model, category);
     }
 
     public ResultSet getAssets() {
-        return service.getAllAssets();
-    }
-
-    public boolean updateStatus(int id, String status) {
-        return service.updateStatus(id, status);
-    }
-
-    public int getTotalAssets() {
-        return service.getTotalAssets();
-    }
-
-    public int getAssignedAssets() {
-        return service.getAssignedAssets();
-    }
-
-    public int getAvailableAssets() {
-        return service.getAvailableAssets();
+        try {
+            return service.getAllAssets();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public ResultSet searchAssets(String keyword) {
-        return service.searchAssets(keyword);
+        try {
+            return service.searchAssets(keyword);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // ================= HELPER METHODS =================
+
+    private List<Asset> loadAssetsForWeb() {
+        List<Asset> list = new ArrayList<>();
+        try (ResultSet rs = service.getAllAssets()) {
+            while (rs != null && rs.next()) {
+                Asset asset = new Asset();
+                asset.setAssetId(rs.getInt("id"));
+                asset.setAssetTag(rs.getString("asset_tag"));
+                asset.setDeviceName(rs.getString("name"));
+                asset.setSerialNumber(rs.getString("serial_number"));
+                asset.setBrand(rs.getString("brand"));
+                asset.setStatus(rs.getString("status"));
+                list.add(asset);
+            }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
+        return list;
     }
 }

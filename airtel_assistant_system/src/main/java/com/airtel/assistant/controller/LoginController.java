@@ -2,8 +2,8 @@ package com.airtel.assistant.controller;
 
 import com.airtel.assistant.security.SessionManager;
 import com.airtel.assistant.service.UserService;
-import com.airtel.assistant.controller.AssetController;
-import org.springframework.beans.factory.annotation.Autowired; // Added
+import com.airtel.assistant.service.AssetService; // CORRECTED: Import the Service, not the Controller
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 @SessionAttributes({"username", "role"})
 public class LoginController {
 
-    // REMOVED "new" - Spring will now inject these with the DB settings loaded
     @Autowired
     private UserService userService;
 
     @Autowired
-    private AssetController assetController;
+    private AssetService assetService; // This variable name must match your method calls below
 
     @GetMapping("/")
     public String showLandingPage() {
@@ -44,15 +43,12 @@ public class LoginController {
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
         String user = (String) model.getAttribute("username");
-        if (user == null) {
-            return "redirect:/";
-        }
+        if (user == null) return "redirect:/";
 
-        String role = (String) model.getAttribute("role");
-
-        int total = assetController.getTotalAssets();
-        int assigned = assetController.getAssignedAssets();
-        int available = assetController.getAvailableAssets();
+        // The red lines will disappear now because 'assetService' is properly defined above
+        int total = assetService.getTotalAssets();
+        int assigned = assetService.getAssignedAssets();
+        int available = assetService.getAvailableAssets();
 
         model.addAttribute("total", total);
         model.addAttribute("assigned", assigned);
@@ -61,19 +57,13 @@ public class LoginController {
         return "dashboard";
     }
 
-    // --- ORIGINAL LOGIC (UNTOUCHED) ---
+    // Original Login Logic
     public boolean login(String username, String password) {
         boolean isValid = userService.login(username, password);
-
         if (isValid) {
             String role = userService.getRole(username);
             SessionManager.setCurrentUser(username, role);
         }
-
         return isValid;
-    }
-
-    public String getRole(String username) {
-        return userService.getRole(username);
     }
 }

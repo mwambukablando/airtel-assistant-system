@@ -1,13 +1,35 @@
 package com.airtel.assistant.repository;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import com.airtel.assistant.config.DatabaseConfig;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class AssignmentRepository {
+
+    // 1. Database Credentials from Render/Properties
+    @Value("${spring.datasource.url}")
+    private String dbUrl;
+
+    @Value("${spring.datasource.username}")
+    private String dbUser;
+
+    @Value("${spring.datasource.password}")
+    private String dbPass;
+
+    // 2. Inject the Audit Repository (Fixes line 65)
+    @Autowired
+    private AuditLogRepository auditLogRepo;
+
+    private Connection getConnection() throws Exception {
+        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
+    }
 
     public boolean assignAsset(int assetId, String employee, String department, String dateString) {
         String formattedDate;
@@ -20,13 +42,11 @@ public class AssignmentRepository {
             return false;
         }
 
-        // --- THE CORRECTION IS HERE ---
-        // We added 'assign_id' to the columns and '0' to the values to stop the error.
         String checkSql = "SELECT status FROM assets WHERE id = ?";
         String insertSql = "INSERT INTO assignments(asset_id, employee_name, department, assign_date, status, assign_id) VALUES(?,?,?,?,?,0)";
         String updateAssetSql = "UPDATE assets SET status = 'ASSIGNED' WHERE id = ?";
 
-        try (Connection conn = DatabaseConfig.getConnection()) {
+        try (Connection conn = getConnection()) {
             conn.setAutoCommit(false); 
 
             // --- A. Check if Asset is Available ---
@@ -61,15 +81,17 @@ public class AssignmentRepository {
 
                 if (rowsInserted > 0 && rowsUpdated > 0) {
                     conn.commit();
-                    // Log the action
-                    AuditLogRepository.logAction(assetId, "Assigned to " + employee);
+                    
+                    // FIX: Using the injected repo instead of the static call
+                    auditLogRepo.logAction(assetId, "Assigned to " + employee);
+                    
                     return true;
                 } else {
                     conn.rollback();
                     return false;
                 }
             } catch (Exception e) {
-                if (conn != null) conn.rollback();
+                conn.rollback();
                 e.printStackTrace();
                 return false;
             }

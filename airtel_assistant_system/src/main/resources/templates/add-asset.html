@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Asset | Airtel Assistant</title>
+    <style>
+        body { background-color: #121212; color: white; font-family: 'Segoe UI', sans-serif; padding: 40px; }
+        .container { max-width: 1000px; margin: auto; }
+        .form-card { background: #1e1e1e; padding: 25px; border-radius: 12px; border: 1px solid #333; margin-bottom: 30px; }
+        h2 { color: #e11d48; margin: 0 0 20px 0; }
+        .grid-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 12px; color: #888; margin-bottom: 5px; }
+        input { padding: 12px; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 6px; }
+        .btn-save { background: #e11d48; color: white; border: none; padding: 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 20px; grid-column: span 3; }
+        table { width: 100%; border-collapse: collapse; background: #1e1e1e; border: 1px solid #333; }
+        th { background: #161616; color: #e11d48; padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #222; color: #ccc; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h2>Register New Asset</h2>
+            <form th:action="@{/assets/save}" method="post" class="grid-form">
+                <div class="input-group">
+                    <label>Asset Tag</label>
+                    <input type="text" name="assetTag" placeholder="AT-001" required>
+                </div>
+                <div class="input-group">
+                    <label>Device Name</label>
+                    <input type="text" name="deviceName" placeholder="Laptop" required>
+                </div>
+                <div class="input-group">
+                    <label>Serial Number</label>
+                    <input type="text" name="serialNumber" placeholder="SN-123" required>
+                </div>
+                <div class="input-group">
+                    <label>Brand</label>
+                    <input type="text" name="brand" placeholder="HP / Lenovo" required>
+                </div>
+                <div class="input-group">
+                    <label>Model</label>
+                    <input type="text" name="modelName" placeholder="EliteBook" required>
+                </div>
+                <div class="input-group">
+                    <label>Category</label>
+                    <input type="text" name="category" placeholder="IT Hardware" required>
+                </div>
+                <button type="submit" class="btn-save">ADD TO INVENTORY</button>
+            </form>
+        </div>
+
+        <h3>CURRENT INVENTORY</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Tag</th>
+                    <th>Device</th>
+                    <th>Brand</th>
+                    <th>Serial</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="asset : ${assets}">
+                    <td th:text="${asset.assetTag}">Tag</td>
+                    <td th:text="${asset.deviceName}">Device</td>
+                    <td th:text="${asset.brand}">Brand</td>
+                    <td th:text="${asset.serialNumber}">Serial</td>
+                    <td style="color:#e11d48" th:text="${asset.status}">AVAILABLE</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

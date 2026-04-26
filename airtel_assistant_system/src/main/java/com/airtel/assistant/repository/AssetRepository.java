@@ -1,16 +1,15 @@
 package com.airtel.assistant.repository;
 
 import java.sql.Connection;
-import java.sql.DriverManager; // Changed to use standard DriverManager
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import org.springframework.beans.factory.annotation.Value; // Added
-import org.springframework.stereotype.Repository; // Added
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Repository;
 
-@Repository // This tells Spring to manage this class
+@Repository 
 public class AssetRepository {
 
-    // Pulling these from application.properties / Render Environment Variables
     @Value("${spring.datasource.url}")
     private String dbUrl;
 
@@ -20,34 +19,35 @@ public class AssetRepository {
     @Value("${spring.datasource.password}")
     private String dbPass;
 
-    // Helper method to get connection using injected variables
     private Connection getConnection() throws Exception {
         return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 
-    // ================= ADD ASSET =================
-    public boolean addAsset(String name, String serial, String type) {
-        String sql = "INSERT INTO assets(name, serial_number, type, status) VALUES(?,?,?,?)";
-        try (Connection conn = getConnection(); // Use our new getConnection()
+    // ================= ADD ASSET (Updated to 6 Parameters) =================
+    public boolean addAsset(String tag, String name, String serial, String brand, String model, String type) {
+        // Updated SQL to include the new columns
+        String sql = "INSERT INTO assets(asset_tag, name, serial_number, brand, model, type, status) VALUES(?,?,?,?,?,?,?)";
+        try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, name);
-            ps.setString(2, serial);
-            ps.setString(3, type);
-            ps.setString(4, "AVAILABLE");
+            ps.setString(1, tag);
+            ps.setString(2, name);
+            ps.setString(3, serial);
+            ps.setString(4, brand);
+            ps.setString(5, model);
+            ps.setString(6, type);
+            ps.setString(7, "AVAILABLE");
 
-            boolean success = ps.executeUpdate() > 0;
-            // Note: AuditLogRepository should also be updated similarly if it's not working
-            return success;
+            return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    // ================= SEARCH ASSETS =================
+    // ================= SEARCH ASSETS (Updated Columns) =================
     public ResultSet searchAssets(String keyword) {
-        String sql = "SELECT id, name, serial_number, type, status FROM assets " +
-                     "WHERE name LIKE ? OR serial_number LIKE ? OR type LIKE ?";
+        String sql = "SELECT id, asset_tag, name, serial_number, brand, model, type, status FROM assets " +
+                     "WHERE name LIKE ? OR serial_number LIKE ? OR asset_tag LIKE ?";
         try {
             Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -63,9 +63,10 @@ public class AssetRepository {
         }
     }
 
-    // ================= GET ALL ASSETS =================
+    // ================= GET ALL ASSETS (Updated Columns) =================
     public ResultSet getAllAssets() {
-        String sql = "SELECT id, name, serial_number, type, status FROM assets";
+        // Using * is safer now since we added many columns
+        String sql = "SELECT id, asset_tag, name, serial_number, brand, model, type, status FROM assets";
         try {
             Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
