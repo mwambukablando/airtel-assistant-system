@@ -21,8 +21,9 @@ public class UserRepository {
 
     public boolean createUser(String firstName, String lastName, String username) {
         String fullName = firstName + " " + lastName;
-        // Ensure column names match your Railway DB exactly
-        String sql = "INSERT INTO users (username, password, role, full_name) VALUES (?, '123', 'USER', ?)";
+        // FIXED: Changed full_name to fullname to match your Railway screenshot
+        String sql = "INSERT INTO users (username, password, role, fullname) VALUES (?, '123', 'USER', ?)";
+        
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -34,10 +35,10 @@ public class UserRepository {
         }
     }
 
-    // --- FIX: Logic to pull everyone including the Admin ---
     public List<Map<String, String>> getAllUsersList() {
         List<Map<String, String>> list = new ArrayList<>();
-        String sql = "SELECT username, full_name, role FROM users";
+        // FIXED: Changed full_name to fullname
+        String sql = "SELECT username, fullname, role FROM users";
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
@@ -47,9 +48,9 @@ public class UserRepository {
                 Map<String, String> user = new HashMap<>();
                 user.put("username", rs.getString("username"));
                 
-                // Fallback for Admin if full_name is null in DB
-                String name = rs.getString("full_name");
-                user.put("fullName", (name != null && !name.isEmpty()) ? name : "System Administrator");
+                // FIXED: Reading from 'fullname'
+                String name = rs.getString("fullname");
+                user.put("fullName", (name != null && !name.isEmpty()) ? name : "Administrator");
                 
                 user.put("role", rs.getString("role"));
                 list.add(user);
@@ -60,6 +61,7 @@ public class UserRepository {
         return list;
     }
 
+    // Keep your login, getRole, and deleteUser methods below...
     public boolean login(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
         try (Connection conn = getConnection();
@@ -68,7 +70,7 @@ public class UserRepository {
             ps.setString(2, password);
             ResultSet rs = ps.executeQuery();
             return rs.next();
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) { return false; }
     }
 
     public String getRole(String username) {
@@ -78,7 +80,7 @@ public class UserRepository {
             ps.setString(1, username);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) return rs.getString("role");
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { }
         return "USER";
     }
 
@@ -88,6 +90,6 @@ public class UserRepository {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, username);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) { e.printStackTrace(); return false; }
+        } catch (Exception e) { return false; }
     }
 }
