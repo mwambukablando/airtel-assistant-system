@@ -44,7 +44,6 @@ public class AssetController {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
-    // BRIDGE METHODS FOR SWING (Changed return type to List<Map> to match Service)
     public List<Map<String, String>> getAssets() {
         return service.getAllAssets();
     }
