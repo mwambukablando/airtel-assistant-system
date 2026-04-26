@@ -41,6 +41,20 @@ public class AssetRepository {
         }
     }
 
+    // --- RESTORED: Required by ReturnService ---
+    public boolean updateStatus(int id, String status) {
+        String sql = "UPDATE assets SET condition_status=? WHERE asset_id=?";
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     // --- SMART LOGIC: Checks for ACTIVE assignments to determine status ---
     public ResultSet getAllAssets() {
         String sql = "SELECT a.asset_id, a.asset_tag, a.device_name, a.serial_number, a.brand, a.model, a.category, " +

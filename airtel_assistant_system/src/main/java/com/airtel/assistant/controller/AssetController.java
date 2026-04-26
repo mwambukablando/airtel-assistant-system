@@ -17,6 +17,8 @@ public class AssetController {
     @Autowired
     private AssetService service;
 
+    // ================= WEB ROUTES (For Render) =================
+
     @GetMapping("/assets/add")
     public String showAddAssetForm(Model model) {
         model.addAttribute("assets", loadAssetsForWeb());
@@ -43,9 +45,32 @@ public class AssetController {
         }
     }
 
+    // ================= SWING BRIDGE METHODS (Restored) =================
+    // These satisfy the compilation errors in AddAssetForm and SearchForm
+
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
+
+    public ResultSet getAssets() {
+        try {
+            return service.getAllAssets();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public ResultSet searchAssets(String keyword) {
+        try {
+            return service.searchAssets(keyword);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    // ================= HELPER METHODS =================
 
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
@@ -57,10 +82,7 @@ public class AssetController {
                 asset.setDeviceName(rs.getString("device_name"));
                 asset.setSerialNumber(rs.getString("serial_number"));
                 asset.setBrand(rs.getString("brand"));
-                
-                // Read the dynamic status from the SQL CASE statement
                 asset.setStatus(rs.getString("calculated_status"));
-                
                 list.add(asset);
             }
         } catch (Exception e) { 
