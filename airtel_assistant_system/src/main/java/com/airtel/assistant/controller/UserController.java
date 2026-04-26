@@ -27,9 +27,13 @@ public class UserController {
                            @RequestParam String username) {
         
         userRepo.createUser(firstName, lastName, username);
+        return "redirect:/admin/users"; // Refreshes page to show new user in table
+    }
+    @PostMapping("/admin/users/delete")
+    public String deleteUser(@RequestParam String username) {
+        userRepo.deleteUser(username);
         return "redirect:/admin/users";
     }
-
     private List<Map<String, String>> loadUsersFromDb() {
         List<Map<String, String>> list = new ArrayList<>();
         try (ResultSet rs = userRepo.getAllUsers()) {
