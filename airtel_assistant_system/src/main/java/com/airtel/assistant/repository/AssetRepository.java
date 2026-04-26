@@ -19,7 +19,6 @@ public class AssetRepository {
         return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 
-    // --- FIXED: Added for AssetService and AddAssetForm ---
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         String sql = "INSERT INTO assets(asset_tag, device_name, serial_number, brand, model, category, status) VALUES(?,?,?,?,?,?,'AVAILABLE')";
         try (Connection conn = getConnection();
@@ -73,6 +72,7 @@ public class AssetRepository {
         return results;
     }
 
+    // 1. Total Assets is correct (Should show 2)
     public int countTotalAssets() {
         String sql = "SELECT COUNT(*) FROM assets";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
@@ -81,16 +81,18 @@ public class AssetRepository {
         return 0;
     }
 
+    // 2. FIXED: Must look at the 'assignments' table for 'ACTIVE' status
     public int countAssignedAssets() {
-        String sql = "SELECT COUNT(*) FROM assets WHERE status = 'ASSIGNED'";
+        String sql = "SELECT COUNT(*) FROM assignments WHERE status = 'ACTIVE'";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
     }
 
+    // 3. FIXED: Available = Total Assets MINUS Active Assignments
     public int countAvailableAssets() {
-        String sql = "SELECT COUNT(*) FROM assets WHERE status = 'AVAILABLE'";
+        String sql = "SELECT (SELECT COUNT(*) FROM assets) - (SELECT COUNT(*) FROM assignments WHERE status = 'ACTIVE')";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) { e.printStackTrace(); }
