@@ -17,11 +17,18 @@ public class SearchController {
 
     @GetMapping("/search")
     public String showSearchPage(@RequestParam(required = false) String query, Model model) {
-        if (query != null && !query.trim().isEmpty()) {
-            List<Map<String, String>> results = assetRepo.searchAssetsList(query);
-            model.addAttribute("results", results);
+        List<Map<String, String>> results;
+
+        // If query is empty/null, it now fetches ALL assets
+        if (query == null || query.trim().isEmpty()) {
+            results = assetRepo.searchAssetsList(""); 
+            model.addAttribute("lastQuery", "");
+        } else {
+            results = assetRepo.searchAssetsList(query);
             model.addAttribute("lastQuery", query);
         }
+
+        model.addAttribute("results", results);
         return "search-page";
     }
 }

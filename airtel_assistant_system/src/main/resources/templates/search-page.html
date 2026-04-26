@@ -19,11 +19,11 @@
 
 <div class="search-container">
     <a th:href="@{/dashboard}" class="btn-back">← Back to Dashboard</a>
-    <h1 style="color: var(--airtel-red); margin-bottom: 10px;">Search Inventory</h1>
+    <h1 style="color: var(--airtel-red); margin-bottom: 10px;">Asset Inventory</h1>
     
-    <form th:action="@{/search}" method="get">
-        <input type="text" name="query" class="search-box" 
-               th:value="${lastQuery}" placeholder="Search by Asset Tag, Serial, or Name..." autofocus>
+    <form id="searchForm" th:action="@{/search}" method="get">
+        <input type="text" name="query" class="search-box" id="searchInput"
+               th:value="${lastQuery}" placeholder="Type to filter by Tag, Serial, or Name..." autofocus>
     </form>
 
     <div th:if="${results != null}">
@@ -41,7 +41,10 @@
                     <td th:text="${res.tag}"></td>
                     <td th:text="${res.name}"></td>
                     <td th:text="${res.serial}"></td>
-                    <td th:text="${res.status}" th:style="${res.status == 'AVAILABLE' ? 'color:lime' : 'color:orange'}"></td>
+                    <td>
+                        <b th:text="${res.status}" 
+                           th:style="${res.status == 'AVAILABLE' ? 'color:lime' : 'color:orange'}"></b>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -51,6 +54,25 @@
         </div>
     </div>
 </div>
+
+<script>
+    // This auto-submits the form 500ms after the user stops typing
+    let typingTimer;
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+
+    searchInput.addEventListener('input', () => {
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            searchForm.submit();
+        }, 500); 
+    });
+
+    // Moves cursor to the end of the input field on load
+    const val = searchInput.value;
+    searchInput.value = '';
+    searchInput.value = val;
+</script>
 
 </body>
 </html>
