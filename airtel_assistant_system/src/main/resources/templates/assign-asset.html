@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Airtel | Assign Asset</title>
+    <style>
+        :root { --airtel-red: #e11d48; --dark-bg: #121212; --panel-bg: #1e1e1e; --text-dim: #888; }
+        body { background-color: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+        .form-card { background: var(--panel-bg); padding: 30px; border-radius: 8px; border: 1px solid #333; max-width: 600px; margin: auto; }
+        .header { color: var(--airtel-red); font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+        .input-group { margin-bottom: 15px; display: flex; flex-direction: column; }
+        label { color: var(--text-dim); font-size: 13px; margin-bottom: 5px; }
+        input, select { background: #2d2d2d; border: 1px solid #444; color: white; padding: 12px; border-radius: 4px; }
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-save { flex: 2; background: var(--airtel-red); border: none; color: white; padding: 15px; font-weight: bold; cursor: pointer; }
+        .btn-back { flex: 1; background: #444; color: white; text-align: center; padding: 15px; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="form-card">
+    <div class="header">Assign Asset to Employee</div>
+    
+    <form th:action="@{/assignments/save}" method="post">
+        <div class="input-group">
+            <label>Select Available Asset</label>
+            <select name="assetId" required>
+                <option value="">-- Select Asset --</option>
+                <option th:each="asset : ${assets}" 
+                        th:value="${asset.assetId}" 
+                        th:text="${asset.assetId} + ' - ' + ${asset.deviceName} + ' (' + ${asset.assetTag} + ')'">
+                </option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Employee Name</label>
+            <input type="text" name="employeeName" placeholder="Full Name" required>
+        </div>
+
+        <div class="input-group">
+            <label>Department</label>
+            <input type="text" name="department" placeholder="e.g. IT, Marketing" required>
+        </div>
+
+        <div class="input-group">
+            <label>Assignment Date</label>
+            <input type="date" name="assignDate" required>
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn-save">CONFIRM ASSIGNMENT</button>
+            <a th:href="@{/dashboard}" class="btn-back">CANCEL</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>
