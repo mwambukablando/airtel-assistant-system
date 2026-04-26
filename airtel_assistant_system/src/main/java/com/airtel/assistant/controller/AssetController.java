@@ -17,11 +17,8 @@ public class AssetController {
     @Autowired
     private AssetService service;
 
-    // ================= WEB ROUTES =================
-
     @GetMapping("/assets/add")
     public String showAddAssetForm(Model model) {
-        // Loads existing assets to show in the table on the 'Add Asset' page
         model.addAttribute("assets", loadAssetsForWeb());
         return "add-asset";
     }
@@ -38,7 +35,6 @@ public class AssetController {
         boolean success = addAsset(assetTag, deviceName, serialNumber, brand, modelName, category);
         
         if (success) {
-            // Redirect back to the form to see the new entry in the list
             return "redirect:/assets/add";
         } else {
             model.addAttribute("error", "Error: Duplicate serial or database failure.");
@@ -46,9 +42,6 @@ public class AssetController {
             return "add-asset";
         }
     }
-
-    // ================= SWING BRIDGE METHODS =================
-    // Used by AddAssetForm.java and SearchForm.java
 
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
@@ -70,19 +63,18 @@ public class AssetController {
         }
     }
 
-    // ================= HELPER METHODS =================
-
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
+        // Note: rs.getString matches the column names in your Railway DB
         try (ResultSet rs = service.getAllAssets()) {
             while (rs != null && rs.next()) {
                 Asset asset = new Asset();
-                asset.setAssetId(rs.getInt("id"));
+                asset.setAssetId(rs.getInt("asset_id")); 
                 asset.setAssetTag(rs.getString("asset_tag"));
-                asset.setDeviceName(rs.getString("name"));
+                asset.setDeviceName(rs.getString("device_name"));
                 asset.setSerialNumber(rs.getString("serial_number"));
                 asset.setBrand(rs.getString("brand"));
-                asset.setStatus(rs.getString("status"));
+                asset.setStatus(rs.getString("condition_status"));
                 list.add(asset);
             }
         } catch (Exception e) { 

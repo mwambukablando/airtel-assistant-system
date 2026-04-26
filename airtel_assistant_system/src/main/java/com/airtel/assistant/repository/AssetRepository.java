@@ -23,10 +23,10 @@ public class AssetRepository {
         return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 
-    // ================= ADD ASSET (Updated to 6 Parameters) =================
-    public boolean addAsset(String tag, String name, String serial, String brand, String model, String type) {
-        // Updated SQL to include the new columns
-        String sql = "INSERT INTO assets(asset_tag, name, serial_number, brand, model, type, status) VALUES(?,?,?,?,?,?,?)";
+    // ================= ADD ASSET (Updated to match Railway Columns) =================
+    public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
+        // Matches Railway: asset_tag, device_name, serial_number, brand, model, category, condition_status
+        String sql = "INSERT INTO assets(asset_tag, device_name, serial_number, brand, model, category, condition_status) VALUES(?,?,?,?,?,?,?)";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, tag);
@@ -34,7 +34,7 @@ public class AssetRepository {
             ps.setString(3, serial);
             ps.setString(4, brand);
             ps.setString(5, model);
-            ps.setString(6, type);
+            ps.setString(6, category);
             ps.setString(7, "AVAILABLE");
 
             return ps.executeUpdate() > 0;
@@ -46,8 +46,8 @@ public class AssetRepository {
 
     // ================= SEARCH ASSETS (Updated Columns) =================
     public ResultSet searchAssets(String keyword) {
-        String sql = "SELECT id, asset_tag, name, serial_number, brand, model, type, status FROM assets " +
-                     "WHERE name LIKE ? OR serial_number LIKE ? OR asset_tag LIKE ?";
+        String sql = "SELECT asset_id, asset_tag, device_name, serial_number, brand, model, category, condition_status FROM assets " +
+                     "WHERE device_name LIKE ? OR serial_number LIKE ? OR asset_tag LIKE ?";
         try {
             Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -65,8 +65,7 @@ public class AssetRepository {
 
     // ================= GET ALL ASSETS (Updated Columns) =================
     public ResultSet getAllAssets() {
-        // Using * is safer now since we added many columns
-        String sql = "SELECT id, asset_tag, name, serial_number, brand, model, type, status FROM assets";
+        String sql = "SELECT asset_id, asset_tag, device_name, serial_number, brand, model, category, condition_status FROM assets";
         try {
             Connection conn = getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
@@ -79,7 +78,7 @@ public class AssetRepository {
 
     // ================= UPDATE STATUS =================
     public boolean updateStatus(int id, String status) {
-        String sql = "UPDATE assets SET status=? WHERE id=?";
+        String sql = "UPDATE assets SET condition_status=? WHERE asset_id=?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
@@ -103,7 +102,7 @@ public class AssetRepository {
     }
 
     public int countAssignedAssets() {
-        String sql = "SELECT COUNT(*) FROM assets WHERE status = 'ASSIGNED'";
+        String sql = "SELECT COUNT(*) FROM assets WHERE condition_status = 'ASSIGNED'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -113,7 +112,7 @@ public class AssetRepository {
     }
 
     public int countAvailableAssets() {
-        String sql = "SELECT COUNT(*) FROM assets WHERE status = 'AVAILABLE'";
+        String sql = "SELECT COUNT(*) FROM assets WHERE condition_status = 'AVAILABLE'";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
