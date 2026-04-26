@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.ResultSet;
 import java.util.*;
 
 @Controller
@@ -17,9 +16,11 @@ public class UserController {
 
     @GetMapping("/admin/users")
     public String manageUsers(Model model) {
-        model.addAttribute("users", loadUsersFromDb());
+        // Now getting the list directly from the repo
+        model.addAttribute("users", userRepo.getAllUsersList());
         return "manage-users";
     }
+
     @PostMapping("/admin/users/save")
     public String saveUser(@RequestParam String firstName, 
                            @RequestParam String lastName, 
@@ -27,24 +28,10 @@ public class UserController {
         userRepo.createUser(firstName, lastName, username);
         return "redirect:/admin/users";
     }
+
     @PostMapping("/admin/users/delete")
     public String deleteUser(@RequestParam String username) {
         userRepo.deleteUser(username);
         return "redirect:/admin/users";
-    }
-    private List<Map<String, String>> loadUsersFromDb() {
-        List<Map<String, String>> list = new ArrayList<>();
-        try (ResultSet rs = userRepo.getAllUsers()) {
-            while (rs != null && rs.next()) {
-                Map<String, String> user = new HashMap<>();
-                user.put("username", rs.getString("username"));
-                user.put("fullName", rs.getString("full_name"));
-                user.put("role", rs.getString("role"));
-                list.add(user);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return list;
     }
 }
