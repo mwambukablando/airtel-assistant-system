@@ -1,6 +1,7 @@
 package com.airtel.assistant.controller;
 
 import com.airtel.assistant.model.Asset;
+import com.airtel.assistant.repository.UserRepository;
 import com.airtel.assistant.service.AssetService;
 import com.airtel.assistant.service.AssignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AssignmentController {
@@ -21,23 +23,28 @@ public class AssignmentController {
     private AssignmentService service;
 
     @Autowired
-    private AssetService assetService; // Needed to load the dropdown list
+    private AssetService assetService;
 
-    // --- 1. ADDED THIS: The route to actually SHOW the assign-asset.html page ---
+    @Autowired
+    private UserRepository userRepo; // Injected to pull the registered users list
+
+    // --- SHOW THE FORM WITH ASSETS AND REGISTERED USERS ---
     @GetMapping("/assets/assign")
     public String showAssignForm(Model model) {
         model.addAttribute("assets", loadAvailableAssetsOnly());
-        return "assign-asset"; // This must match your HTML file name exactly
+        // Pulling the list we created in Manage Users
+        model.addAttribute("registeredUsers", userRepo.getAllUsersList());
+        return "assign-asset"; 
     }
 
-    // --- 2. WEB ROUTE TO SAVE THE ASSIGNMENT ---
+    // --- SAVE THE ASSIGNMENT ---
     @PostMapping("/assignments/save")
     public String saveAssignment(@RequestParam int assetId,
-                                 @RequestParam String employeeName,
+                                 @RequestParam String username, // Changed to match HTML 'name'
                                  @RequestParam String department,
                                  @RequestParam String assignDate) {
         
-        boolean success = service.assignAsset(assetId, employeeName, department, assignDate);
+        boolean success = service.assignAsset(assetId, username, department, assignDate);
         
         if (success) {
             return "redirect:/dashboard"; 
@@ -46,12 +53,10 @@ public class AssignmentController {
         }
     }
 
-    // --- HELPER: Logic to filter assets for the dropdown ---
     private List<Asset> loadAvailableAssetsOnly() {
         List<Asset> list = new ArrayList<>();
         try (ResultSet rs = assetService.getAllAssets()) {
             while (rs != null && rs.next()) {
-                // We only add to dropdown if the Smart Logic says it's AVAILABLE
                 if ("AVAILABLE".equals(rs.getString("calculated_status"))) {
                     Asset asset = new Asset();
                     asset.setAssetId(rs.getInt("asset_id"));
@@ -66,7 +71,6 @@ public class AssignmentController {
         return list;
     }
 
-    // --- SWING BRIDGE ---
     public boolean assignAsset(int assetId, String employee, String department, String date) {
         return service.assignAsset(assetId, employee, department, date);
     }

@@ -27,8 +27,8 @@ public class AssignmentRepository {
         return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 
-    public boolean assignAsset(int assetId, String employee, String department, String dateString) {
-        // We use your exact Railway column names here
+    public boolean assignAsset(int assetId, String username, String department, String dateString) {
+        // Updated to use 'username' to ensure we link to a unique user ID
         String insertSql = "INSERT INTO assignments(asset_id, employee_name, department, assigned_date, status) VALUES(?,?,?,?,?)";
 
         try (Connection conn = getConnection()) {
@@ -36,7 +36,7 @@ public class AssignmentRepository {
 
             try (PreparedStatement psInsert = conn.prepareStatement(insertSql)) {
                 psInsert.setInt(1, assetId);
-                psInsert.setString(2, employee);
+                psInsert.setString(2, username); // This stores the unique ID/username
                 psInsert.setString(3, department);
                 psInsert.setString(4, dateString);
                 psInsert.setString(5, "ACTIVE");
@@ -45,7 +45,8 @@ public class AssignmentRepository {
 
                 if (rowsInserted > 0) {
                     conn.commit();
-                    auditLogRepo.logAction(assetId, "Assigned to " + employee);
+                    // Log using the unique username for better tracking
+                    auditLogRepo.logAction(assetId, "Assigned to unique user: " + username);
                     return true;
                 } else {
                     conn.rollback();
