@@ -1,0 +1,4 @@
+id,asset_tag,name,brand,model,serial_number,type,status,condition_status,purchase_date
+1,null,laptop,null,null,zxcvbn1234567,personal,AVAILABLE,null,null
+2,null,phone,null,null,mnbvcxz76543211,desktop,AVAILABLE,null,null
+3,null,tablet,null,null,mmbv2345678nn,personal,AVAILABLE,null,null

@@ -1,0 +1,3 @@
+id,asset_id,return_date,condition_status,status
+1,2,2026-04-23,it was stolen,RETURNED
+2,3,2026-04-23,noella didn't pay for it,RETURNED

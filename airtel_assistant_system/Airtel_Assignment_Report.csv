@@ -1,0 +1,4 @@
+id,asset_id,employee_name,department,assign_date,expected_return,status
+1,2,Blando,IT,2026-04-23,null,ACTIVE
+2,3,noella,IT,2026-04-23,null,ACTIVE
+3,5,lea,IT,2026-04-25,null,ACTIVE
