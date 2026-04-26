@@ -3,19 +3,24 @@ package com.airtel.assistant.controller;
 import com.airtel.assistant.security.SessionManager;
 import com.airtel.assistant.service.UserService;
 import com.airtel.assistant.controller.AssetController;
+import org.springframework.beans.factory.annotation.Autowired; // Added
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.SessionAttributes; // Added for web state
+import org.springframework.web.bind.annotation.SessionAttributes;
 
 @Controller
-@SessionAttributes({"username", "role"}) // This keeps the user logged in across pages
+@SessionAttributes({"username", "role"})
 public class LoginController {
 
-    private UserService userService = new UserService();
-    private AssetController assetController = new AssetController();
+    // REMOVED "new" - Spring will now inject these with the DB settings loaded
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private AssetController assetController;
 
     @GetMapping("/")
     public String showLandingPage() {
@@ -27,7 +32,6 @@ public class LoginController {
         boolean success = login(username, password);
         
         if (success) {
-            // We store these in the Model so @SessionAttributes can pick them up
             model.addAttribute("username", SessionManager.getUsername());
             model.addAttribute("role", SessionManager.getRole());
             return "redirect:/dashboard"; 
@@ -39,15 +43,13 @@ public class LoginController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
-        // Double check if user is actually logged in
         String user = (String) model.getAttribute("username");
         if (user == null) {
-            return "redirect:/"; // Kick back to login if session is empty
+            return "redirect:/";
         }
 
         String role = (String) model.getAttribute("role");
 
-        // Stats logic untouched, exactly as you wanted
         int total = assetController.getTotalAssets();
         int assigned = assetController.getAssignedAssets();
         int available = assetController.getAvailableAssets();
