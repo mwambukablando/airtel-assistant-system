@@ -21,6 +21,7 @@ public class AssetController {
 
     @GetMapping("/assets/add")
     public String showAddAssetForm(Model model) {
+        // Loads existing assets to show in the table on the 'Add Asset' page
         model.addAttribute("assets", loadAssetsForWeb());
         return "add-asset";
     }
@@ -37,15 +38,17 @@ public class AssetController {
         boolean success = addAsset(assetTag, deviceName, serialNumber, brand, modelName, category);
         
         if (success) {
+            // Redirect back to the form to see the new entry in the list
             return "redirect:/assets/add";
         } else {
-            model.addAttribute("error", "Error: Could not save asset.");
+            model.addAttribute("error", "Error: Duplicate serial or database failure.");
             model.addAttribute("assets", loadAssetsForWeb());
             return "add-asset";
         }
     }
 
     // ================= SWING BRIDGE METHODS =================
+    // Used by AddAssetForm.java and SearchForm.java
 
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
