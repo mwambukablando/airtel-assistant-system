@@ -33,6 +33,7 @@ public class AssetRepository {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
+    // --- FIXED: This clears the error in ReturnService.java ---
     public boolean updateStatus(int id, String status) {
         String sql = "UPDATE assets SET status=? WHERE asset_id=?";
         try (Connection conn = getConnection();

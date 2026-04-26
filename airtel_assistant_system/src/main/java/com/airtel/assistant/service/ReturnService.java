@@ -22,7 +22,7 @@ public class ReturnService {
         boolean saved = returnRepo.returnAsset(assetId, date, condition);
 
         if(saved) {
-            // This line 29 will turn green once AssetRepository has public boolean updateStatus(int, String)
+            // This now matches the updateStatus(int, String) in AssetRepository
             assetRepo.updateStatus(assetId, "AVAILABLE");
         }
 

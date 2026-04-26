@@ -44,6 +44,7 @@ public class AssetController {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
+    // --- BRIDGE METHODS: These satisfy the compiler for Swing forms ---
     public List<Map<String, String>> getAssets() {
         return service.getAllAssets();
     }
