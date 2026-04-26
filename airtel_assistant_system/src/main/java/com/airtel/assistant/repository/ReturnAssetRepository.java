@@ -5,8 +5,10 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.springframework.stereotype.Repository; // <--- ADD THIS
 import com.airtel.assistant.config.DatabaseConfig;
 
+@Repository // <--- ADD THIS
 public class ReturnAssetRepository {
 
     public boolean returnAsset(int assetId, String dateString, String condition) {
