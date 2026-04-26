@@ -37,7 +37,7 @@ public class AssetController {
         if (success) {
             return "redirect:/assets/add";
         } else {
-            model.addAttribute("error", "Error: Duplicate serial or database failure.");
+            model.addAttribute("error", "Error: Database failure.");
             model.addAttribute("assets", loadAssetsForWeb());
             return "add-asset";
         }
@@ -47,25 +47,8 @@ public class AssetController {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
-    public ResultSet getAssets() {
-        try {
-            return service.getAllAssets();
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    public ResultSet searchAssets(String keyword) {
-        try {
-            return service.searchAssets(keyword);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
-        // Note: rs.getString matches the column names in your Railway DB
         try (ResultSet rs = service.getAllAssets()) {
             while (rs != null && rs.next()) {
                 Asset asset = new Asset();
@@ -74,7 +57,10 @@ public class AssetController {
                 asset.setDeviceName(rs.getString("device_name"));
                 asset.setSerialNumber(rs.getString("serial_number"));
                 asset.setBrand(rs.getString("brand"));
-                asset.setStatus(rs.getString("condition_status"));
+                
+                // Read the dynamic status from the SQL CASE statement
+                asset.setStatus(rs.getString("calculated_status"));
+                
                 list.add(asset);
             }
         } catch (Exception e) { 
