@@ -40,15 +40,17 @@ public class AssetController {
         }
     }
 
+    // BRIDGE: Satisfaction for AddAssetForm logic
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
-    // --- BRIDGE METHODS: These satisfy the compiler for Swing forms ---
+    // BRIDGE: Satisfaction for AddAssetForm.java:141
     public List<Map<String, String>> getAssets() {
         return service.getAllAssets();
     }
 
+    // BRIDGE: Satisfaction for SearchForm.java:142
     public List<Map<String, String>> searchAssets(String keyword) {
         return service.searchAssets(keyword);
     }
@@ -56,15 +58,17 @@ public class AssetController {
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
         List<Map<String, String>> dbData = service.getAllAssets();
-        for (Map<String, String> row : dbData) {
-            Asset asset = new Asset();
-            asset.setAssetId(Integer.parseInt(row.get("id"))); 
-            asset.setAssetTag(row.get("tag"));
-            asset.setDeviceName(row.get("name"));
-            asset.setSerialNumber(row.get("serial"));
-            asset.setBrand(row.get("brand"));
-            asset.setStatus(row.get("status"));
-            list.add(asset);
+        if (dbData != null) {
+            for (Map<String, String> row : dbData) {
+                Asset asset = new Asset();
+                asset.setAssetId(Integer.parseInt(row.get("id"))); 
+                asset.setAssetTag(row.get("tag"));
+                asset.setDeviceName(row.get("name"));
+                asset.setSerialNumber(row.get("serial"));
+                asset.setBrand(row.get("brand"));
+                asset.setStatus(row.get("status"));
+                list.add(asset);
+            }
         }
         return list;
     }
