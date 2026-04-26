@@ -3,7 +3,6 @@ package com.airtel.assistant.repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import org.springframework.stereotype.Repository;
 import com.airtel.assistant.config.DatabaseConfig;
 
@@ -11,43 +10,40 @@ import com.airtel.assistant.config.DatabaseConfig;
 public class ReturnAssetRepository {
 
     public boolean returnAsset(int assetId, String dateString, String condition) {
-        String formattedDate;
-        try {
-            // Handle date conversion
-            DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            // If your HTML date input sends yyyy-MM-dd, use that. 
-            // If it sends M/d/yyyy (like your Swing form), use the previous formatter.
-            LocalDate date = LocalDate.parse(dateString); 
-            formattedDate = date.toString();
-        } catch (Exception e) {
-            formattedDate = LocalDate.now().toString(); // Fallback to today
-        }
-
+        // SQL 1: Log the return record
         String logReturnSql = "INSERT INTO returns(asset_id, return_date, condition_status, status) VALUES(?,?,?,?)";
+        // SQL 2: Mark the physical asset as available
         String updateAssetSql = "UPDATE assets SET status = 'AVAILABLE' WHERE asset_id = ?";
+        // SQL 3: MARK THE ASSIGNMENT AS INACTIVE (Fixes your screenshot)
+        String updateAssignmentSql = "UPDATE assignments SET status = 'RETURNED' WHERE asset_id = ? AND status = 'ACTIVE'";
 
         try (Connection conn = DatabaseConfig.getConnection()) {
-            conn.setAutoCommit(false); // Start Transaction
+            conn.setAutoCommit(false); // Start transaction
 
             try (PreparedStatement psLog = conn.prepareStatement(logReturnSql);
-                 PreparedStatement psUpdate = conn.prepareStatement(updateAssetSql)) {
+                 PreparedStatement psUpdate = conn.prepareStatement(updateAssetSql);
+                 PreparedStatement psAssign = conn.prepareStatement(updateAssignmentSql)) {
 
-                // 1. Log the return
+                // 1. Log return
                 psLog.setInt(1, assetId);
-                psLog.setString(2, formattedDate);
+                psLog.setString(2, dateString);
                 psLog.setString(3, condition);
                 psLog.setString(4, "RETURNED");
                 psLog.executeUpdate();
 
-                // 2. Update the Asset status to AVAILABLE
+                // 2. Update asset status
                 psUpdate.setInt(1, assetId);
                 psUpdate.executeUpdate();
 
-                conn.commit(); // Save both changes!
+                // 3. Close the assignment record
+                psAssign.setInt(1, assetId);
+                psAssign.executeUpdate();
+
+                conn.commit(); 
                 return true;
 
             } catch (Exception e) {
-                conn.rollback(); // Undo if anything goes wrong
+                conn.rollback();
                 e.printStackTrace();
                 return false;
             }
