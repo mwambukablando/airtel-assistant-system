@@ -19,9 +19,9 @@ public class ReturnController {
     @Autowired
     private AssetRepository assetRepo;
 
+    // --- WEB ROUTE ---
     @GetMapping("/assets/return")
     public String showReturnForm(Model model) {
-        // Fetch all assets and filter for 'ASSIGNED'
         List<Map<String, String>> assignedAssets = assetRepo.searchAssetsList("")
                 .stream()
                 .filter(asset -> "ASSIGNED".equals(asset.get("status")))
@@ -35,8 +35,12 @@ public class ReturnController {
     public String saveReturnWeb(@RequestParam int assetId,
                                 @RequestParam String returnDate,
                                 @RequestParam String condition) {
-        
         boolean success = service.returnAsset(assetId, returnDate, condition);
         return success ? "redirect:/dashboard?returned=true" : "redirect:/assets/return?error=true";
+    }
+
+    // --- BRIDGE: Satisfies ReturnAssetForm.java:[115,41] ---
+    public boolean returnAsset(int assetId, String date, String condition) {
+        return service.returnAsset(assetId, date, condition);
     }
 }
