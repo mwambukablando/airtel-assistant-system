@@ -5,11 +5,16 @@
     <style>
         body { background-color: #121212; color: white; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
         .login-container { background: #1e1e1e; padding: 40px; border-radius: 12px; width: 380px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid #333; }
-        h1 { color: #e11d48; font-size: 26px; margin-bottom: 30px; letter-spacing: 1px; }
-        input { width: 100%; padding: 14px; margin: 10px 0; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; background: #e11d48; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; font-size: 16px; }
+        h1 { color: #e11d48; font-size: 26px; margin-bottom: 20px; letter-spacing: 1px; }
+        input { width: 100%; padding: 14px; margin: 10px 0; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: #e11d48; }
         
-        /* STATIC DEVELOPER SECTION */
+        /* Updated button to ensure clickability */
+        .submit-btn { width: 100%; padding: 14px; background: #e11d48; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 15px; font-size: 16px; display: block; }
+        .submit-btn:hover { background: #be123c; }
+
+        .error-msg { color: #f87171; font-size: 14px; margin-bottom: 15px; background: rgba(225, 29, 72, 0.1); padding: 10px; border-radius: 4px; border: 1px solid rgba(225, 29, 72, 0.2); }
+        
         .dev-footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #333; }
         .dev-names { font-size: 13px; color: #888; line-height: 1.6; }
         .req-creds { font-size: 11px; color: #444; margin-top: 10px; }
@@ -19,10 +24,13 @@
     <div class="login-container">
         <h1>AIRTEL LOGIN</h1>
         
-        <form th:action="@{/login}" method="post">
-            <input type="text" name="username" placeholder="Username" required>
+        <div th:if="${error}" class="error-msg" th:text="${error}"></div>
+
+        <form id="loginForm" th:action="@{/login}" method="post">
+            <input type="text" name="username" placeholder="Username" required autocomplete="off">
             <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">ACCESS SYSTEM</button>
+            
+            <button type="submit" class="submit-btn">ACCESS SYSTEM</button>
         </form>
 
         <div class="dev-footer">
