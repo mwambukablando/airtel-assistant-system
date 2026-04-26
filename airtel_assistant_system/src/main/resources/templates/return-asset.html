@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Airtel | Return Asset</title>
+    <style>
+        :root { --airtel-red: #e11d48; --dark-bg: #121212; --panel-bg: #1e1e1e; }
+        body { background-color: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 40px; }
+        .container { max-width: 500px; margin: auto; background: var(--panel-bg); padding: 30px; border-radius: 8px; border: 1px solid #333; }
+        label { display: block; margin-bottom: 8px; color: #888; font-size: 14px; }
+        select, input { width: 100%; padding: 12px; margin-bottom: 20px; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        .btn-submit { width: 100%; background: var(--airtel-red); color: white; border: none; padding: 15px; font-weight: bold; cursor: pointer; }
+        .btn-submit:hover { background: #be123c; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="color: var(--airtel-red); margin-top: 0;">Return Asset</h2>
+    <form th:action="@{/assets/return/save}" method="post">
+        <label>Select Asset to Return</label>
+        <select name="assetId" required>
+            <option value="">-- Choose Assigned Device --</option>
+            <option th:each="asset : ${assets}" 
+                    th:value="${asset.id}" 
+                    th:text="${asset.tag} + ' - ' + ${asset.name}"></option>
+        </select>
+
+        <label>Return Date</label>
+        <input type="date" name="returnDate" required>
+
+        <label>Condition Status</label>
+        <select name="condition">
+            <option value="Good">Good / Functional</option>
+            <option value="Damaged">Damaged</option>
+            <option value="Lost">Lost</option>
+            <option value="Needs Repair">Needs Repair</option>
+        </select>
+
+        <button type="submit" class="btn-submit">PROCESS RETURN</button>
+        <a th:href="@{/dashboard}" style="display:block; text-align:center; margin-top:15px; color:#666; text-decoration:none; font-size:13px;">Cancel</a>
+    </form>
+</div>
+
+</body>
+</html>
