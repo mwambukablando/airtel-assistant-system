@@ -20,14 +20,12 @@ public class UserController {
         model.addAttribute("users", loadUsersFromDb());
         return "manage-users";
     }
-
     @PostMapping("/admin/users/save")
     public String saveUser(@RequestParam String firstName, 
                            @RequestParam String lastName, 
                            @RequestParam String username) {
-        
         userRepo.createUser(firstName, lastName, username);
-        return "redirect:/admin/users"; // Refreshes page to show new user in table
+        return "redirect:/admin/users";
     }
     @PostMapping("/admin/users/delete")
     public String deleteUser(@RequestParam String username) {
