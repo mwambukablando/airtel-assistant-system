@@ -5,7 +5,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.sql.ResultSet;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -40,30 +41,26 @@ public class SearchForm extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        // --- ROOT PANEL ---
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBackground(AppStyle.DARK_BG);
         mainPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
         setContentPane(mainPanel);
 
-        // ================= TOP SEARCH BAR PANEL =================
         JPanel top = new JPanel(new BorderLayout(15, 0));
         top.setOpaque(false);
         top.setBorder(new EmptyBorder(0, 0, 10, 0));
 
-        // Keyword Label
         JLabel lblKeyword = new JLabel("ENTER KEYWORD:");
         lblKeyword.setForeground(AppStyle.TEXT_DIM);
         lblKeyword.setFont(new Font("Segoe UI", Font.BOLD, 12));
         top.add(lblKeyword, BorderLayout.NORTH);
 
-        // Search Input & Buttons Container
         JPanel searchBox = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 10));
         searchBox.setOpaque(false);
 
         txtSearch = new JTextField(25);
         AppStyle.styleTextField(txtSearch);
-        txtSearch.setPreferredSize(new Dimension(350, 40)); // Wider and taller
+        txtSearch.setPreferredSize(new Dimension(350, 40));
 
         btnSearch = new JButton("FIND ASSET");
         AppStyle.styleDarkButton(btnSearch);
@@ -75,15 +72,14 @@ public class SearchForm extends JFrame {
         btnBack.setPreferredSize(new Dimension(100, 40));
 
         searchBox.add(txtSearch);
-        searchBox.add(Box.createHorizontalStrut(10)); // Spacer
+        searchBox.add(Box.createHorizontalStrut(10));
         searchBox.add(btnSearch);
-        searchBox.add(Box.createHorizontalStrut(10)); // Spacer
+        searchBox.add(Box.createHorizontalStrut(10));
         searchBox.add(btnBack);
 
         top.add(searchBox, BorderLayout.CENTER);
         mainPanel.add(top, BorderLayout.NORTH);
 
-        // ================= RESULTS TABLE =================
         model = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -96,7 +92,6 @@ public class SearchForm extends JFrame {
         model.addColumn("Type");
         model.addColumn("Status");
 
-        // --- TABLE STYLING ---
         table.setBackground(AppStyle.PANEL_BG);
         table.setForeground(Color.WHITE);
         table.setGridColor(new Color(60, 60, 60));
@@ -106,7 +101,6 @@ public class SearchForm extends JFrame {
         table.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         table.setShowVerticalLines(false);
 
-        // --- HEADER STYLING ---
         JTableHeader header = table.getTableHeader();
         header.setBackground(new Color(20, 20, 20));
         header.setForeground(AppStyle.AIRTEL_RED);
@@ -119,16 +113,16 @@ public class SearchForm extends JFrame {
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // ACTIONS
         btnSearch.addActionListener(e -> search());
         btnBack.addActionListener(e -> this.dispose());
-
-        // ENTER key listener for searching
         txtSearch.addActionListener(e -> search());
 
         setVisible(true);
     }
 
+    /**
+     * UPDATED: Using List<Map> to stop the compilation error.
+     */
     private void search() {
         String keyword = txtSearch.getText().trim();
         if (keyword.isEmpty()) {
@@ -139,21 +133,22 @@ public class SearchForm extends JFrame {
 
         try {
             model.setRowCount(0);
-            ResultSet rs = controller.searchAssets(keyword);
+            
+            // FIXED: Changed ResultSet to List<Map> to match the Controller update
+            List<Map<String, String>> results = controller.searchAssets(keyword);
 
             boolean found = false;
-            if (rs != null) {
-                while (rs.next()) {
-                    found = true;
+            if (results != null && !results.isEmpty()) {
+                found = true;
+                for (Map<String, String> row : results) {
                     model.addRow(new Object[]{
-                        rs.getInt("id"),
-                        rs.getString("name"),
-                        rs.getString("serial_number"),
-                        rs.getString("type"),
-                        rs.getString("status")
+                        row.get("id"),
+                        row.get("name"),
+                        row.get("serial"),
+                        row.get("tag"), // Using tag as type fallback if needed
+                        row.get("status")
                     });
                 }
-                rs.close();
             }
 
             if (!found) {

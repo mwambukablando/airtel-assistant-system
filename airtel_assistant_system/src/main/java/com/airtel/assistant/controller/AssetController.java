@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +15,6 @@ public class AssetController {
 
     @Autowired
     private AssetService service;
-
-    // ================= WEB ROUTES (For Render) =================
 
     @GetMapping("/assets/add")
     public String showAddAssetForm(Model model) {
@@ -34,9 +30,7 @@ public class AssetController {
                             @RequestParam String modelName,
                             @RequestParam String category,
                             Model model) {
-        
         boolean success = addAsset(assetTag, deviceName, serialNumber, brand, modelName, category);
-        
         if (success) {
             return "redirect:/assets/add";
         } else {
@@ -46,15 +40,11 @@ public class AssetController {
         }
     }
 
-    // ================= SWING BRIDGE METHODS (Updated to avoid errors) =================
-
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
-    // Note: Since we moved to List<Map> for Web, if your Swing app strictly 
-    // requires a ResultSet, we would need a separate legacy method. 
-    // For now, these are changed to return the List to stop the red lines.
+    // BRIDGE METHODS FOR SWING (Changed return type to List<Map> to match Service)
     public List<Map<String, String>> getAssets() {
         return service.getAllAssets();
     }
@@ -63,16 +53,11 @@ public class AssetController {
         return service.searchAssets(keyword);
     }
 
-    // ================= HELPER METHODS (Web Logic) =================
-
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
-        // FIXED: Now uses the List<Map> coming from service
         List<Map<String, String>> dbData = service.getAllAssets();
-        
         for (Map<String, String> row : dbData) {
             Asset asset = new Asset();
-            // We use the keys we defined in AssetRepository.searchAssetsList
             asset.setAssetId(Integer.parseInt(row.get("id"))); 
             asset.setAssetTag(row.get("tag"));
             asset.setDeviceName(row.get("name"));

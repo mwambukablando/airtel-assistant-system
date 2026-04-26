@@ -19,7 +19,6 @@ public class AssetRepository {
         return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 
-    // --- ADD ASSET ---
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         String sql = "INSERT INTO assets(asset_tag, device_name, serial_number, brand, model, category) VALUES(?,?,?,?,?,?)";
         try (Connection conn = getConnection();
@@ -34,27 +33,16 @@ public class AssetRepository {
         } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- NEW: This method clears the error in ReturnService.java ---
     public boolean updateStatus(int id, String status) {
-        // Note: Check if your column is 'status' or 'condition_status' in Railway
         String sql = "UPDATE assets SET status=? WHERE asset_id=?";
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setInt(2, id);
             return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        } catch (Exception e) { e.printStackTrace(); return false; }
     }
 
-    // --- UPDATED: Used by the Dashboard to list assets safely ---
-    public List<Map<String, String>> getAllAssets() {
-        return searchAssetsList(""); // Passing empty string returns everyone
-    }
-
-    // --- Search Method (Returns List for connection safety) ---
     public List<Map<String, String>> searchAssetsList(String keyword) {
         List<Map<String, String>> results = new ArrayList<>();
         String sql = "SELECT a.asset_id, a.asset_tag, a.device_name, a.serial_number, a.brand, a.model, " +
@@ -65,12 +53,10 @@ public class AssetRepository {
 
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            
             String pattern = "%" + keyword + "%";
             ps.setString(1, pattern);
             ps.setString(2, pattern);
             ps.setString(3, pattern);
-
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Map<String, String> row = new HashMap<>();
@@ -87,7 +73,6 @@ public class AssetRepository {
         return results;
     }
 
-    // --- Dashboard Stats ---
     public int countTotalAssets() {
         String sql = "SELECT COUNT(*) FROM assets";
         try (Connection conn = getConnection(); PreparedStatement ps = conn.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {

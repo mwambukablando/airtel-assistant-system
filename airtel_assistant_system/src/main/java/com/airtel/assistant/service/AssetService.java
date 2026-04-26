@@ -3,7 +3,6 @@ package com.airtel.assistant.service;
 import com.airtel.assistant.repository.AssetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 
@@ -20,13 +19,10 @@ public class AssetService {
         return repo.addAsset(tag, name, serial, brand, model, category);
     }
 
-    // --- FIXED: Now returns List<Map> to match the new Repository logic ---
     public List<Map<String, String>> getAllAssets() {
-        // We use the keyword search with an empty string to get all records
         return repo.searchAssetsList(""); 
     }
 
-    // --- FIXED: This clears the error for your Search functionality ---
     public List<Map<String, String>> searchAssets(String keyword) {
         return repo.searchAssetsList(keyword);
     }

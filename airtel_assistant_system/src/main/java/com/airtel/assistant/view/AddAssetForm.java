@@ -1,17 +1,19 @@
 package com.airtel.assistant.view;
 
 import java.awt.*;
-import java.sql.ResultSet;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 import com.airtel.assistant.controller.AssetController;
 import com.airtel.assistant.utils.AppStyle;
 
+/**
+ * Blando, this version is updated to use List<Map> instead of ResultSet
+ * to ensure compatibility with the updated AssetController.
+ */
 public class AddAssetForm extends JFrame {
 
-    // Added new fields: txtTag, txtBrand, txtModel
     JTextField txtTag, txtName, txtSerial, txtBrand, txtModel, txtType;
     JButton btnSave, btnBack;
 
@@ -19,11 +21,12 @@ public class AddAssetForm extends JFrame {
     JTable table;
     JScrollPane scrollPane;
 
+    // Use the controller instance
     AssetController controller = new AssetController();
 
     public AddAssetForm() {
         setTitle("Airtel Asset Management | Add Asset");
-        setSize(850, 700); // Increased size to fit new fields
+        setSize(850, 700);
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
@@ -33,7 +36,6 @@ public class AddAssetForm extends JFrame {
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-        // Updated GridLayout to 7 rows to accommodate new fields
         JPanel formPanel = new JPanel(new GridLayout(7, 2, 10, 15)); 
         formPanel.setOpaque(false);
 
@@ -85,7 +87,6 @@ public class AddAssetForm extends JFrame {
         model.addColumn("Serial");
         model.addColumn("Status");
 
-        // (Table styling code remains same as your original)
         table.setBackground(AppStyle.PANEL_BG);
         table.setForeground(Color.WHITE);
         table.setGridColor(new Color(60, 60, 60));
@@ -122,7 +123,6 @@ public class AddAssetForm extends JFrame {
             return;
         }
 
-        // FIX: Now calling the Controller with all 6 parameters
         boolean success = controller.addAsset(tag, name, serial, brand, modelName, type);
 
         if (success) {
@@ -131,23 +131,33 @@ public class AddAssetForm extends JFrame {
             txtBrand.setText(""); txtModel.setText(""); txtType.setText("");
             loadAssets();
         } else {
-            JOptionPane.showMessageDialog(this, "Error: Duplicate Serial/Tag or DB error.", "System Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error: Database failure.", "System Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
+    /**
+     * UPDATED: Now iterates through a List of Maps.
+     * This stops the 'cannot find symbol' and type mismatch errors.
+     */
     private void loadAssets() {
         try {
             model.setRowCount(0);
-            ResultSet rs = controller.getAssets();
-            while (rs != null && rs.next()) {
-                model.addRow(new Object[]{
-                    rs.getInt("id"),
-                    rs.getString("asset_tag"),
-                    rs.getString("name"),
-                    rs.getString("serial_number"),
-                    rs.getString("status")
-                });
+            // We call the controller which now returns the web-safe List
+            List<Map<String, String>> assets = controller.getAssets();
+            
+            if (assets != null) {
+                for (Map<String, String> row : assets) {
+                    model.addRow(new Object[]{
+                        row.get("id"),
+                        row.get("tag"),
+                        row.get("name"),
+                        row.get("serial"),
+                        row.get("status")
+                    });
+                }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) { 
+            e.printStackTrace(); 
+        }
     }
 }
