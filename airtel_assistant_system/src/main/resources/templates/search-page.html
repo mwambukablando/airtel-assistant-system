@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Airtel | Global Search</title>
+    <style>
+        :root { --airtel-red: #e11d48; --dark-bg: #121212; --panel-bg: #1e1e1e; }
+        body { background-color: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 40px; }
+        .search-container { max-width: 900px; margin: auto; }
+        .search-box { width: 100%; padding: 15px; background: #2d2d2d; border: 1px solid #444; color: white; border-radius: 8px; font-size: 18px; margin-bottom: 30px; }
+        .search-box:focus { border-color: var(--airtel-red); outline: none; }
+        .results-table { width: 100%; border-collapse: collapse; background: var(--panel-bg); border: 1px solid #333; }
+        th { text-align: left; color: var(--airtel-red); padding: 15px; border-bottom: 2px solid #333; }
+        td { padding: 15px; border-bottom: 1px solid #333; color: #ccc; }
+        .btn-back { display: inline-block; margin-bottom: 20px; color: #888; text-decoration: none; font-size: 14px; }
+        .btn-back:hover { color: white; }
+    </style>
+</head>
+<body>
+
+<div class="search-container">
+    <a th:href="@{/dashboard}" class="btn-back">← Back to Dashboard</a>
+    <h1 style="color: var(--airtel-red); margin-bottom: 10px;">Search Inventory</h1>
+    
+    <form th:action="@{/search}" method="get">
+        <input type="text" name="query" class="search-box" 
+               th:value="${lastQuery}" placeholder="Search by Asset Tag, Serial, or Name..." autofocus>
+    </form>
+
+    <div th:if="${results != null}">
+        <table class="results-table">
+            <thead>
+                <tr>
+                    <th>Tag</th>
+                    <th>Device Name</th>
+                    <th>Serial Number</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="res : ${results}">
+                    <td th:text="${res.tag}"></td>
+                    <td th:text="${res.name}"></td>
+                    <td th:text="${res.serial}"></td>
+                    <td th:text="${res.status}" th:style="${res.status == 'AVAILABLE' ? 'color:lime' : 'color:orange'}"></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div th:if="${#lists.isEmpty(results)}" style="text-align: center; margin-top: 50px; color: #666;">
+            No assets found matching "<span th:text="${lastQuery}"></span>"
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

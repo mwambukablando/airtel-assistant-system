@@ -2,23 +2,27 @@ package com.airtel.assistant.service;
 
 import com.airtel.assistant.repository.AssetRepository;
 import com.airtel.assistant.repository.ReturnAssetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ReturnService {
 
-    private ReturnAssetRepository returnRepo = new ReturnAssetRepository();
-    private AssetRepository assetRepo = new AssetRepository();
+    @Autowired
+    private ReturnAssetRepository returnRepo;
+
+    @Autowired
+    private AssetRepository assetRepo;
 
     public boolean returnAsset(int assetId, String date, String condition) {
-
-        if(condition.isEmpty()) {
+        if(condition == null || condition.isEmpty()) {
             return false;
         }
 
-        // 1. Save return record
         boolean saved = returnRepo.returnAsset(assetId, date, condition);
 
-        // 2. Update asset status back to AVAILABLE
         if(saved) {
+            // This line 29 will turn green once AssetRepository has public boolean updateStatus(int, String)
             assetRepo.updateStatus(assetId, "AVAILABLE");
         }
 

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,21 +25,18 @@ public class AssignmentController {
     private AssetService assetService;
 
     @Autowired
-    private UserRepository userRepo; // Injected to pull the registered users list
+    private UserRepository userRepo; 
 
-    // --- SHOW THE FORM WITH ASSETS AND REGISTERED USERS ---
     @GetMapping("/assets/assign")
     public String showAssignForm(Model model) {
         model.addAttribute("assets", loadAvailableAssetsOnly());
-        // Pulling the list we created in Manage Users
         model.addAttribute("registeredUsers", userRepo.getAllUsersList());
         return "assign-asset"; 
     }
 
-    // --- SAVE THE ASSIGNMENT ---
     @PostMapping("/assignments/save")
     public String saveAssignment(@RequestParam int assetId,
-                                 @RequestParam String username, // Changed to match HTML 'name'
+                                 @RequestParam String username, 
                                  @RequestParam String department,
                                  @RequestParam String assignDate) {
         
@@ -53,20 +49,22 @@ public class AssignmentController {
         }
     }
 
+    // --- FIXED: Now works with List<Map> from AssetService ---
     private List<Asset> loadAvailableAssetsOnly() {
         List<Asset> list = new ArrayList<>();
-        try (ResultSet rs = assetService.getAllAssets()) {
-            while (rs != null && rs.next()) {
-                if ("AVAILABLE".equals(rs.getString("calculated_status"))) {
-                    Asset asset = new Asset();
-                    asset.setAssetId(rs.getInt("asset_id"));
-                    asset.setAssetTag(rs.getString("asset_tag"));
-                    asset.setDeviceName(rs.getString("device_name"));
-                    list.add(asset);
-                }
+        // assetService.getAllAssets() now returns List<Map<String, String>>
+        List<Map<String, String>> dbAssets = assetService.getAllAssets();
+        
+        for (Map<String, String> row : dbAssets) {
+            // Only add to the dropdown if it is actually AVAILABLE
+            if ("AVAILABLE".equals(row.get("status"))) {
+                Asset asset = new Asset();
+                // Convert the String ID back to an Integer for the model
+                asset.setAssetId(Integer.parseInt(row.get("id")));
+                asset.setAssetTag(row.get("tag"));
+                asset.setDeviceName(row.get("name"));
+                list.add(asset);
             }
-        } catch (Exception e) { 
-            e.printStackTrace(); 
         }
         return list;
     }

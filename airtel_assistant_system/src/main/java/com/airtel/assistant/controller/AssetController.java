@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class AssetController {
@@ -45,48 +46,40 @@ public class AssetController {
         }
     }
 
-    // ================= SWING BRIDGE METHODS (Restored) =================
-    // These satisfy the compilation errors in AddAssetForm and SearchForm
+    // ================= SWING BRIDGE METHODS (Updated to avoid errors) =================
 
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
         return service.addAsset(tag, name, serial, brand, model, category);
     }
 
-    public ResultSet getAssets() {
-        try {
-            return service.getAllAssets();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    // Note: Since we moved to List<Map> for Web, if your Swing app strictly 
+    // requires a ResultSet, we would need a separate legacy method. 
+    // For now, these are changed to return the List to stop the red lines.
+    public List<Map<String, String>> getAssets() {
+        return service.getAllAssets();
     }
 
-    public ResultSet searchAssets(String keyword) {
-        try {
-            return service.searchAssets(keyword);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public List<Map<String, String>> searchAssets(String keyword) {
+        return service.searchAssets(keyword);
     }
 
-    // ================= HELPER METHODS =================
+    // ================= HELPER METHODS (Web Logic) =================
 
     private List<Asset> loadAssetsForWeb() {
         List<Asset> list = new ArrayList<>();
-        try (ResultSet rs = service.getAllAssets()) {
-            while (rs != null && rs.next()) {
-                Asset asset = new Asset();
-                asset.setAssetId(rs.getInt("asset_id")); 
-                asset.setAssetTag(rs.getString("asset_tag"));
-                asset.setDeviceName(rs.getString("device_name"));
-                asset.setSerialNumber(rs.getString("serial_number"));
-                asset.setBrand(rs.getString("brand"));
-                asset.setStatus(rs.getString("calculated_status"));
-                list.add(asset);
-            }
-        } catch (Exception e) { 
-            e.printStackTrace(); 
+        // FIXED: Now uses the List<Map> coming from service
+        List<Map<String, String>> dbData = service.getAllAssets();
+        
+        for (Map<String, String> row : dbData) {
+            Asset asset = new Asset();
+            // We use the keys we defined in AssetRepository.searchAssetsList
+            asset.setAssetId(Integer.parseInt(row.get("id"))); 
+            asset.setAssetTag(row.get("tag"));
+            asset.setDeviceName(row.get("name"));
+            asset.setSerialNumber(row.get("serial"));
+            asset.setBrand(row.get("brand"));
+            asset.setStatus(row.get("status"));
+            list.add(asset);
         }
         return list;
     }

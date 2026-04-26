@@ -1,9 +1,11 @@
 package com.airtel.assistant.service;
 
-import java.sql.ResultSet;
 import com.airtel.assistant.repository.AssetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AssetService {
@@ -12,19 +14,21 @@ public class AssetService {
     private AssetRepository repo;
 
     public boolean addAsset(String tag, String name, String serial, String brand, String model, String category) {
-        if(name.isEmpty() || serial.isEmpty() || tag.isEmpty()) {
+        if(name == null || name.isEmpty() || serial == null || serial.isEmpty() || tag == null || tag.isEmpty()) {
             return false;
         }
         return repo.addAsset(tag, name, serial, brand, model, category);
     }
 
-    public ResultSet getAllAssets() {
-        return repo.getAllAssets();
+    // --- FIXED: Now returns List<Map> to match the new Repository logic ---
+    public List<Map<String, String>> getAllAssets() {
+        // We use the keyword search with an empty string to get all records
+        return repo.searchAssetsList(""); 
     }
 
-    // THIS METHOD FIXES THE CONTROLLER ERROR
-    public ResultSet searchAssets(String keyword) {
-        return repo.searchAssets(keyword);
+    // --- FIXED: This clears the error for your Search functionality ---
+    public List<Map<String, String>> searchAssets(String keyword) {
+        return repo.searchAssetsList(keyword);
     }
 
     public int getTotalAssets() { return repo.countTotalAssets(); }
