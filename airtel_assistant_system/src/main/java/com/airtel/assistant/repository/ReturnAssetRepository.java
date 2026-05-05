@@ -9,20 +9,20 @@ import com.airtel.assistant.config.DatabaseConfig;
 public class ReturnAssetRepository {
 
     public boolean returnAsset(int assignId, String dateString, String condition) {
-        // We link to assign_id to match your database schema
-        String logReturnSql = "INSERT INTO returns(assign_id, return_date, condition_on_return, status) VALUES(?,?,?,?)";
+        // FIXED: Using 'returns_table' and 'condition_on_return' to match your Railway screenshot
+        String logReturnSql = "INSERT INTO returns_table(assign_id, return_date, condition_on_return) VALUES(?,?,?)";
 
         try (Connection conn = DatabaseConfig.getConnection()) {
             try (PreparedStatement psLog = conn.prepareStatement(logReturnSql)) {
                 psLog.setInt(1, assignId);
                 psLog.setString(2, dateString);
                 psLog.setString(3, condition);
-                psLog.setString(4, "RETURNED");
                 
                 return psLog.executeUpdate() > 0;
             }
         } catch (Exception e) { 
-            e.printStackTrace();
+            System.out.println("DB ERROR: " + e.getMessage());
+            e.printStackTrace(); 
             return false; 
         }
     }

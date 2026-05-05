@@ -11,36 +11,27 @@ public class ReturnService {
 
     @Autowired
     private ReturnAssetRepository returnRepo;
-
     @Autowired
     private AssetRepository assetRepo;
-
     @Autowired
     private AssignmentRepository assignmentRepo;
 
     public boolean returnAsset(int assetId, String date, String condition) {
-        // 1. Validation
-        if(condition == null || condition.isEmpty()) {
-            return false;
-        }
-
-        // 2. Find the active assign_id from the assignments table
-        // This uses the method we just verified in your AssignmentRepository
+        // 1. Get the correct ID from the assignments table
         Integer activeAssignId = assignmentRepo.findActiveIdByAssetId(assetId);
 
         if (activeAssignId == null) {
-            System.out.println("DEBUG: No active assignment found for Asset ID: " + assetId);
+            System.out.println("DEBUG: No active assignment for Asset " + assetId);
             return false;
         }
 
-        // 3. Save to returns table
+        // 2. Save the return record to 'returns_table'
         boolean saved = returnRepo.returnAsset(activeAssignId, date, condition);
 
         if(saved) {
-            // 4. Update Asset to AVAILABLE in assets table
+            // 3. Flip asset status to AVAILABLE
             assetRepo.updateStatus(assetId, "AVAILABLE");
-            
-            // 5. Update Assignment to INACTIVE in assignments table
+            // 4. Flip assignment status to INACTIVE (or RETURNED)
             assignmentRepo.updateStatus(activeAssignId, "INACTIVE");
         }
 
