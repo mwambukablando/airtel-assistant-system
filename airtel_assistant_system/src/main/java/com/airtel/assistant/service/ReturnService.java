@@ -1,11 +1,10 @@
 package com.airtel.assistant.service;
 
 import com.airtel.assistant.repository.AssetRepository;
-import com.airtel.assistant.repository.AssignmentRepository; // Added for ID mapping
+import com.airtel.assistant.repository.AssignmentRepository;
 import com.airtel.assistant.repository.ReturnAssetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReturnService {
@@ -19,29 +18,29 @@ public class ReturnService {
     @Autowired
     private AssignmentRepository assignmentRepo;
 
-    @Transactional
     public boolean returnAsset(int assetId, String date, String condition) {
-        // Validation check
+        // 1. Validation
         if(condition == null || condition.isEmpty()) {
             return false;
         }
 
-        // 1. Find the active Assignment ID for this specific asset
-        // This ensures we link to the 'assign_id' shown in your database
+        // 2. Find the active assign_id from the assignments table
+        // This uses the method we just verified in your AssignmentRepository
         Integer activeAssignId = assignmentRepo.findActiveIdByAssetId(assetId);
 
         if (activeAssignId == null) {
-            return false; // No active assignment found for this asset
+            System.out.println("DEBUG: No active assignment found for Asset ID: " + assetId);
+            return false;
         }
 
-        // 2. Save the return record using the Assignment ID
+        // 3. Save to returns table
         boolean saved = returnRepo.returnAsset(activeAssignId, date, condition);
 
         if(saved) {
-            // 3. Update the Asset status to AVAILABLE
+            // 4. Update Asset to AVAILABLE in assets table
             assetRepo.updateStatus(assetId, "AVAILABLE");
-
-            // 4. Update the Assignment status to INACTIVE so it doesn't show up again
+            
+            // 5. Update Assignment to INACTIVE in assignments table
             assignmentRepo.updateStatus(activeAssignId, "INACTIVE");
         }
 

@@ -8,36 +8,22 @@ import com.airtel.assistant.config.DatabaseConfig;
 @Repository
 public class ReturnAssetRepository {
 
-    public boolean returnAsset(int assetId, String dateString, String condition) {
-        String logReturnSql = "INSERT INTO returns(asset_id, return_date, condition_status, status) VALUES(?,?,?,?)";
-        String updateAssetSql = "UPDATE assets SET status = 'AVAILABLE' WHERE asset_id = ?";
-        String updateAssignmentSql = "UPDATE assignments SET status = 'RETURNED' WHERE asset_id = ? AND status = 'ACTIVE'";
+    public boolean returnAsset(int assignId, String dateString, String condition) {
+        // We link to assign_id to match your database schema
+        String logReturnSql = "INSERT INTO returns(assign_id, return_date, condition_on_return, status) VALUES(?,?,?,?)";
 
         try (Connection conn = DatabaseConfig.getConnection()) {
-            conn.setAutoCommit(false); 
-            try (PreparedStatement psLog = conn.prepareStatement(logReturnSql);
-                 PreparedStatement psUpdate = conn.prepareStatement(updateAssetSql);
-                 PreparedStatement psAssign = conn.prepareStatement(updateAssignmentSql)) {
-
-                psLog.setInt(1, assetId);
+            try (PreparedStatement psLog = conn.prepareStatement(logReturnSql)) {
+                psLog.setInt(1, assignId);
                 psLog.setString(2, dateString);
                 psLog.setString(3, condition);
                 psLog.setString(4, "RETURNED");
-                psLog.executeUpdate();
-
-                psUpdate.setInt(1, assetId);
-                psUpdate.executeUpdate();
-
-                psAssign.setInt(1, assetId);
-                psAssign.executeUpdate();
-
-                conn.commit(); 
-                return true;
-            } catch (Exception e) {
-                conn.rollback();
-                e.printStackTrace();
-                return false;
+                
+                return psLog.executeUpdate() > 0;
             }
-        } catch (Exception e) { return false; }
+        } catch (Exception e) { 
+            e.printStackTrace();
+            return false; 
+        }
     }
 }

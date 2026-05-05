@@ -5,7 +5,10 @@ import com.airtel.assistant.service.ReturnService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,11 +22,13 @@ public class ReturnController {
     @Autowired
     private AssetRepository assetRepo;
 
-    // --- WEB ROUTE ---
+    // --- WEB INTERFACE ROUTES ---
+
     @GetMapping("/assets/return")
     public String showReturnForm(Model model) {
-        List<Map<String, String>> assignedAssets = assetRepo.searchAssetsList("")
-                .stream()
+        List<Map<String, String>> allAssets = assetRepo.searchAssetsList("");
+        
+        List<Map<String, String>> assignedAssets = allAssets.stream()
                 .filter(asset -> "ASSIGNED".equals(asset.get("status")))
                 .collect(Collectors.toList());
 
@@ -32,14 +37,23 @@ public class ReturnController {
     }
 
     @PostMapping("/assets/return/save")
-    public String saveReturnWeb(@RequestParam int assetId,
-                                @RequestParam String returnDate,
-                                @RequestParam String condition) {
+    public String saveReturnWeb(@RequestParam("assetId") int assetId,
+                                @RequestParam("returnDate") String returnDate,
+                                @RequestParam("condition") String condition) {
+        
         boolean success = service.returnAsset(assetId, returnDate, condition);
-        return success ? "redirect:/dashboard?returned=true" : "redirect:/assets/return?error=true";
+        
+        if (success) {
+            return "redirect:/dashboard?returned=true";
+        } else {
+            return "redirect:/assets/return?error=true";
+        }
     }
 
-    // --- BRIDGE: Satisfies ReturnAssetForm.java:[115,41] ---
+    /**
+     * BRIDGE METHOD FOR DESKTOP UI (ReturnAssetForm.java)
+     * This resolves the red line error at line 115 in your Swing form.
+     */
     public boolean returnAsset(int assetId, String date, String condition) {
         return service.returnAsset(assetId, date, condition);
     }
