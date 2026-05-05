@@ -21,5 +21,4 @@ public class SessionManager {
         username = null;
         role = null;
     }
-
 }
