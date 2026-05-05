@@ -22,12 +22,16 @@ import com.airtel.assistant.utils.AppStyle;
 
 public class ReturnAssetForm extends JFrame {
 
-    JTextField txtAssetId, txtDate, txtCondition;
-    JButton btnReturn, btnBack;
+    private JTextField txtAssetId, txtDate, txtCondition;
+    private JButton btnReturn, btnBack;
 
-    ReturnController controller = new ReturnController();
+    // FIXED: Removed the "new ReturnController()" line to prevent null pointer errors
+    private ReturnController controller;
 
-    public ReturnAssetForm() {
+    // FIXED: Updated constructor to accept the controller from Spring
+    public ReturnAssetForm(ReturnController controller) {
+        this.controller = controller;
+        
         setTitle("Airtel | Return Asset");
         setSize(450, 420);
         setLocationRelativeTo(null);
@@ -78,7 +82,7 @@ public class ReturnAssetForm extends JFrame {
 
         btnBack = new JButton("CANCEL");
         AppStyle.styleDarkButton(btnBack);
-        btnBack.setBackground(new Color(60, 60, 60)); // Grey for secondary action
+        btnBack.setBackground(new Color(60, 60, 60)); 
         btnBack.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 
         btnPanel.add(btnReturn);
@@ -112,6 +116,8 @@ public class ReturnAssetForm extends JFrame {
             }
 
             int assetId = Integer.parseInt(assetIdStr);
+            
+            // This now calls the ReturnService through the bridge method we added
             boolean success = controller.returnAsset(assetId, date, condition);
 
             if (success) {
