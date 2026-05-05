@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Airtel | Audit Logs</title>
+    <style>
+        :root { 
+            --airtel-red: #e11d48; 
+            --dark-bg: #121212; 
+            --panel-bg: #1e1e1e; 
+            --text-gray: #888;
+        }
+        body { 
+            background-color: var(--dark-bg); 
+            color: white; 
+            font-family: 'Segoe UI', sans-serif; 
+            padding: 40px; 
+            margin: 0;
+        }
+        .container { max-width: 1000px; margin: auto; }
+        .header-section { margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        
+        .log-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            background: var(--panel-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .log-table th { 
+            background: #2d2d2d; 
+            color: var(--airtel-red); 
+            padding: 15px; 
+            text-align: left; 
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .log-table td { 
+            padding: 15px; 
+            border-bottom: 1px solid #2d2d2d; 
+            font-size: 14px;
+            color: #ddd;
+        }
+        .btn-back {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: var(--text-gray);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .btn-back:hover { color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-section">
+        <a th:href="@{/dashboard}" class="btn-back">← Back to Dashboard</a>
+        <h2 style="color: var(--airtel-red); margin: 10px 0 0 0;">System Audit History</h2>
+        <p style="color: var(--text-gray); font-size: 13px;">Tracking all administrative actions for transparency.</p>
+    </div>
+
+    <table class="log-table">
+        <thead>
+            <tr>
+                <th>Action Date</th>
+                <th>Administrator</th>
+                <th>Description of Action</th>
+                <th>Asset ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="log : ${logs}">
+                <td th:text="${#dates.format(log.date, 'yyyy-MM-dd HH:mm')}">2026-05-05</td>
+                <td th:text="${log.user}" style="font-weight: bold; color: white;">Admin</td>
+                <td th:text="${log.action}">Action description</td>
+                <td th:text="${log.assetId}">001</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(logs)}">
+                <td colspan="4" style="text-align:center; padding: 30px; color: var(--text-gray);">
+                    No activity logs found in Railway.
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
