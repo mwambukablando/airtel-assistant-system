@@ -12,9 +12,9 @@ public class AuditController {
     @Autowired
     private AuditLogRepository auditRepo;
 
-    @GetMapping("/audit-logs")
+    // FIXED: Changed mapping to match the URL in your screenshot
+    @GetMapping("/admin/audit") 
     public String showAuditLogs(Model model) {
-        // Fetches the list and sends it to the "logs" variable in Thymeleaf
         model.addAttribute("logs", auditRepo.getAllLogs());
         return "audit-history";
     }
