@@ -3,6 +3,7 @@ package com.airtel.assistant.service;
 import com.airtel.assistant.repository.AssetRepository;
 import com.airtel.assistant.repository.AssignmentRepository;
 import com.airtel.assistant.repository.ReturnAssetRepository;
+import com.airtel.assistant.repository.AuditLogRepository; // Added this
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,8 @@ public class ReturnService {
     private AssetRepository assetRepo;
     @Autowired
     private AssignmentRepository assignmentRepo;
+    @Autowired
+    private AuditLogRepository auditLogRepo; // Added this
 
     public boolean returnAsset(int assetId, String date, String condition) {
         // 1. Get the correct ID from the assignments table
@@ -33,6 +36,9 @@ public class ReturnService {
             assetRepo.updateStatus(assetId, "AVAILABLE");
             // 4. Flip assignment status to INACTIVE (or RETURNED)
             assignmentRepo.updateStatus(activeAssignId, "INACTIVE");
+            
+            // Added Hook for Audit Logs
+            auditLogRepo.logAction(assetId, "ASSET RETURNED - Condition: " + condition);
         }
 
         return saved;
