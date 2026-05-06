@@ -95,17 +95,17 @@ public class AssetRepository {
         return 0;
     }
 
-    // --- ONLY ADDED THIS FOR REPORTS ---
+    // --- UPDATED FOR REPORTS ---
     public List<Map<String, Object>> getReturnedAssetsList() {
         List<Map<String, Object>> list = new ArrayList<>();
-        // Note: Replace 'returns_table' with your actual table name if different
-        String sql = "SELECT asset_id, return_date, condition_at_return FROM returns_table ORDER BY return_date DESC";
+        // Fixed: matching your condition_on_return and assign_id columns
+        String sql = "SELECT assign_id, return_date, condition_on_return FROM returns_table ORDER BY return_date DESC";
         try (Connection conn = getConnection(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Map<String, Object> row = new HashMap<>();
-                row.put("asset_id", rs.getInt("asset_id"));
+                row.put("asset_id", rs.getInt("assign_id"));
                 row.put("return_date", rs.getTimestamp("return_date"));
-                row.put("condition", rs.getString("condition_at_return"));
+                row.put("condition", rs.getString("condition_on_return"));
                 list.add(row);
             }
         } catch (Exception e) { e.printStackTrace(); }

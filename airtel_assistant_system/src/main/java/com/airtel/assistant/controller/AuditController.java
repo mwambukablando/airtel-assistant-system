@@ -62,28 +62,26 @@ public class AuditController {
     // 4. RETURN REPORT
     @GetMapping("/admin/reports/export/returns")
     public void exportReturnsPDF(HttpServletResponse response) throws IOException {
+        // Headers updated to be clear for the user
         generatePDF(response, "ASSET RETURNS REPORT", 
-            new String[]{"Asset ID", "Return Date", "Condition"}, 
+            new String[]{"Assignment ID", "Return Date", "Condition"}, 
             assetRepo.getReturnedAssetsList(), 
             new String[]{"asset_id", "return_date", "condition"});
     }
 
     /**
-     * UPDATED UNIVERSAL PDF GENERATOR
-     * Using List<? extends Map<String, ?>> fixes the "String vs Object" map error.
+     * UNIVERSAL PDF GENERATOR
      */
     private void generatePDF(HttpServletResponse response, String titleStr, String[] headers, 
                              List<? extends Map<String, ?>> data, String[] mapKeys) throws IOException {
         
         response.setContentType("application/pdf");
-        // "inline" opens it in the browser tab
         response.setHeader("Content-Disposition", "inline; filename=Report.pdf");
 
         Document document = new Document(PageSize.A4);
         PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
 
-        // Header Styling
         Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, new Color(225, 29, 72));
         Paragraph title = new Paragraph(titleStr, titleFont);
         title.setAlignment(Element.ALIGN_CENTER);
@@ -91,11 +89,9 @@ public class AuditController {
         document.add(new Paragraph("Generated on: " + new java.util.Date().toString()));
         document.add(new Paragraph(" "));
 
-        // Table Configuration
         PdfPTable table = new PdfPTable(headers.length);
         table.setWidthPercentage(100);
 
-        // Styling Table Headers
         Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.WHITE);
         for (String headerTitle : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(headerTitle, headerFont));
@@ -105,7 +101,6 @@ public class AuditController {
             table.addCell(cell);
         }
 
-        // Filling Data Rows
         if (data != null) {
             for (Map<String, ?> row : data) {
                 for (String key : mapKeys) {
