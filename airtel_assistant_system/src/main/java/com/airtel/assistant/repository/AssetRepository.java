@@ -50,7 +50,6 @@ public class AssetRepository {
                      "FROM assets a " +
                      "LEFT JOIN assignments ass ON a.asset_id = ass.asset_id AND ass.status = 'ACTIVE' " +
                      "WHERE a.device_name LIKE ? OR a.serial_number LIKE ? OR a.asset_tag LIKE ?";
-
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             String pattern = "%" + (keyword == null ? "" : keyword) + "%";
@@ -72,7 +71,6 @@ public class AssetRepository {
         return results;
     }
 
-    // 1. Total Assets is correct (Should show 2)
     public int countTotalAssets() {
         String sql = "SELECT COUNT(*) FROM assets";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
@@ -81,7 +79,6 @@ public class AssetRepository {
         return 0;
     }
 
-    // 2. FIXED: Must look at the 'assignments' table for 'ACTIVE' status
     public int countAssignedAssets() {
         String sql = "SELECT COUNT(*) FROM assignments WHERE status = 'ACTIVE'";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
@@ -90,12 +87,28 @@ public class AssetRepository {
         return 0;
     }
 
-    // 3. FIXED: Available = Total Assets MINUS Active Assignments
     public int countAvailableAssets() {
         String sql = "SELECT (SELECT COUNT(*) FROM assets) - (SELECT COUNT(*) FROM assignments WHERE status = 'ACTIVE')";
         try (Connection conn = getConnection(); Statement s = conn.createStatement(); ResultSet rs = s.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
         } catch (Exception e) { e.printStackTrace(); }
         return 0;
+    }
+
+    // --- ONLY ADDED THIS FOR REPORTS ---
+    public List<Map<String, Object>> getReturnedAssetsList() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        // Note: Replace 'returns_table' with your actual table name if different
+        String sql = "SELECT asset_id, return_date, condition_at_return FROM returns_table ORDER BY return_date DESC";
+        try (Connection conn = getConnection(); Statement st = conn.createStatement(); ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("asset_id", rs.getInt("asset_id"));
+                row.put("return_date", rs.getTimestamp("return_date"));
+                row.put("condition", rs.getString("condition_at_return"));
+                list.add(row);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return list;
     }
 }
