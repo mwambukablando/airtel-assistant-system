@@ -78,7 +78,6 @@
                 <th>Asset Tag</th>
                 <th>Device Name</th>
                 <th>Serial Number</th>
-                <th>Category</th>
                 <th>Current Status</th>
             </tr>
         </thead>
@@ -87,7 +86,6 @@
                 <td th:text="${asset.tag}" style="font-weight: bold; color: white;"></td>
                 <td th:text="${asset.name}"></td>
                 <td th:text="${asset.serial}"></td>
-                <td th:text="${asset.category}"></td>
                 <td>
                     <span th:text="${asset.status}" 
                           th:classappend="${asset.status == 'AVAILABLE' ? 'status-badge available' : 'status-badge assigned'}">
@@ -95,7 +93,7 @@
                 </td>
             </tr>
             <tr th:if="${#lists.isEmpty(reportData)}">
-                <td colspan="5" style="text-align:center; padding: 30px; color: var(--text-dim);">No assets found to generate report.</td>
+                <td colspan="4" style="text-align:center; padding: 30px; color: var(--text-dim);">No assets found to generate report.</td>
             </tr>
         </tbody>
     </table>
