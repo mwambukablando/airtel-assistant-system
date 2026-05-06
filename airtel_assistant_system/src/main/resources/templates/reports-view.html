@@ -1,103 +1,52 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Airtel | Inventory Reports</title>
+    <title>Airtel | Report Center</title>
     <style>
-        :root { 
-            --airtel-red: #e11d48; 
-            --dark-bg: #121212; 
-            --panel-bg: #1e1e1e; 
-            --text-dim: #888; 
-        }
-        body { 
-            background-color: var(--dark-bg); 
-            color: white; 
-            font-family: 'Segoe UI', sans-serif; 
-            padding: 40px; 
-            margin: 0;
-        }
-        .container { max-width: 1100px; margin: auto; }
-        .header-section { margin-bottom: 30px; border-bottom: 1px solid #333; padding-bottom: 20px; }
+        :root { --airtel-red: #e11d48; --dark-bg: #121212; --panel-bg: #1e1e1e; --text-dim: #888; }
+        body { background-color: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; padding: 40px; margin: 0; }
+        .container { max-width: 900px; margin: auto; }
+        .header-section { text-align: center; margin-bottom: 50px; border-bottom: 1px solid #333; padding-bottom: 30px; }
         
-        .report-table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            background: var(--panel-bg); 
-            border-radius: 4px; 
-            overflow: hidden; 
-            border: 1px solid #333; 
+        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; }
+        .report-card { 
+            background: var(--panel-bg); border: 1px solid #333; padding: 30px; 
+            border-radius: 8px; transition: 0.3s; text-decoration: none; color: white;
+            display: flex; flex-direction: column; align-items: flex-start;
         }
-        .report-table th { 
-            background: #2d2d2d; 
-            color: var(--airtel-red); 
-            padding: 15px; 
-            text-align: left; 
-            font-size: 13px; 
-            text-transform: uppercase;
-        }
-        .report-table td { 
-            padding: 15px; 
-            border-bottom: 1px solid #2d2d2d; 
-            font-size: 14px; 
-            color: #ddd; 
-        }
-        .status-badge { 
-            padding: 4px 10px; 
-            border-radius: 20px; 
-            font-size: 11px; 
-            font-weight: bold; 
-            text-transform: uppercase;
-        }
-        .available { background: #166534; color: #bbf7d0; }
-        .assigned { background: #991b1b; color: #fecaca; }
+        .report-card:hover { border-color: var(--airtel-red); transform: translateY(-5px); background: #252525; }
+        .report-card h3 { color: var(--airtel-red); margin: 0 0 10px 0; font-size: 20px; }
+        .report-card p { font-size: 14px; color: var(--text-dim); margin: 0; line-height: 1.5; }
         
-        .btn-back { 
-            display: inline-block; 
-            margin-bottom: 20px; 
-            color: var(--text-dim); 
-            text-decoration: none; 
-            font-size: 14px; 
-            border: 1px solid #444; 
-            padding: 5px 15px; 
-        }
-        .btn-back:hover { border-color: var(--airtel-red); color: white; }
+        .btn-back { display: inline-block; margin-bottom: 20px; color: var(--text-dim); text-decoration: none; border: 1px solid #444; padding: 5px 15px; }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="header-section">
-        <a th:href="@{/dashboard}" class="btn-back">← DASHBOARD</a>
-        <h2 style="color: var(--airtel-red); margin: 10px 0 0 0;">INVENTORY STATUS REPORT</h2>
-        <p style="color: var(--text-dim); font-size: 13px;">Overview of all registered assets and their current assignments.</p>
+        <a th:href="@{/dashboard}" class="btn-back">← BACK TO DASHBOARD</a>
+        <h1 style="color: var(--airtel-red); margin: 20px 0 5px 0;">REPORT GENERATION CENTER</h1>
+        <p style="color: var(--text-dim);">Select a category to view and print official PDF reports.</p>
     </div>
 
-    <table class="report-table">
-        <thead>
-            <tr>
-                <th>Asset Tag</th>
-                <th>Device Name</th>
-                <th>Serial Number</th>
-                <th>Current Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="asset : ${reportData}">
-                <td th:text="${asset.tag}" style="font-weight: bold; color: white;"></td>
-                <td th:text="${asset.name}"></td>
-                <td th:text="${asset.serial}"></td>
-                <td>
-                    <span th:text="${asset.status}" 
-                          th:classappend="${asset.status == 'AVAILABLE' ? 'status-badge available' : 'status-badge assigned'}">
-                    </span>
-                </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(reportData)}">
-                <td colspan="4" style="text-align:center; padding: 30px; color: var(--text-dim);">No assets found to generate report.</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="report-grid">
+        <a th:href="@{/admin/reports/export/assets}" target="_blank" class="report-card">
+            <h3>Asset Report</h3>
+            <p>Generate a full list of all inventory items and their current availability.</p>
+        </a>
+        <a th:href="@{/admin/reports/export/assignments}" target="_blank" class="report-card">
+            <h3>Assignment Report</h3>
+            <p>View active assignments, employee details, and departments.</p>
+        </a>
+        <a th:href="@{/admin/reports/export/returns}" target="_blank" class="report-card">
+            <h3>Return Report</h3>
+            <p>Summary of returned assets and their condition upon retrieval.</p>
+        </a>
+        <a th:href="@{/admin/reports/export/audit}" target="_blank" class="report-card">
+            <h3>Audit Report</h3>
+            <p>Full administrative log history for security and tracking.</p>
+        </a>
+    </div>
 </div>
-
 </body>
 </html>
